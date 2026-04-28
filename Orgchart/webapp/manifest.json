@@ -1,0 +1,118 @@
+{
+  "_version": "1.37.0",
+  "sap.app": {
+    "id": "hs.com.orgchart",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.19.5",
+      "toolsId": "a4508d82-4c2e-4ec4-8e6e-aa0ebd0823a4"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZHS_ORGCHART_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/mainService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    }
+  },
+
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {},
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+
+  "sap.ui5": {
+    "flexEnabled": true,
+
+    "dependencies": {
+      "minUI5Version": "1.96.8",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "hs.com.orgchart.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "settings": {
+          "useBatch": false
+        }
+      }
+    },
+
+   "resources": {
+        "css": [
+          {
+            "uri": "/css/style.css",
+            "bundle": false
+          }
+        ],
+        "js": [
+       { "uri": "thirdparty/balkan/orgchart.js" },
+       { "uri": "thirdparty/balkan/ula_custom.js" }
+        ]
+      },
+
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "hs.com.orgchart.view",
+        "controlAggregation": "pages",
+        "controlId": "app"
+      },
+      "routes": [
+        {
+          "name": "RouteOrgchart",
+          "pattern": ":?query:",
+          "target": ["TargetOrgchart"]
+        }
+      ],
+      "targets": {
+        "TargetOrgchart": {
+          "viewType": "XML",
+          "transition": "slide",
+          "viewId": "Orgchart",
+          "viewName": "Orgchart"
+        }
+      }
+    },
+
+    "rootView": {
+      "viewName": "hs.com.orgchart.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+    <edmx:DataServices m:DataServiceVersion="2.0">
+        <Schema Namespace="ZHS_ORGCHART_SRV" xml:lang="en" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <Annotation Term="Core.SchemaVersion" String="1.0.0" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
+            <EntityType Name="OrgUnit" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="OrgUnitID"/>
+                </Key>
+                <Property Name="OrgUnitID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Name" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="ParentID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="LeadPositionID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="LeadPersonName" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+            </EntityType>
+            <EntityType Name="Position" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="PersonID"/>
+                </Key>
+                <Property Name="PersonID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="OrgUnitID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Name" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="PositionID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Role" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="PhotoURL" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+            </EntityType>
+            <EntityType Name="Person" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="PositionID"/>
+                </Key>
+                <Property Name="PositionID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="OrgUnitID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Name" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="HolderID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="HolderName" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="ReportsTo" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+            </EntityType>
+            <Association Name="PosiitonToPerson" sap:content-version="1">
+                <End Type="ZHS_ORGCHART_SRV.Position" Multiplicity="1" Role="FromRole_PosiitonToPerson"/>
+                <End Type="ZHS_ORGCHART_SRV.Person" Multiplicity="1" Role="ToRole_PosiitonToPerson"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_PosiitonToPerson">
+                        <PropertyRef Name="PersonID"/>
+                    </Principal>
+                    <Dependent Role="ToRole_PosiitonToPerson">
+                        <PropertyRef Name="HolderID"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="OrgUnitToPosition" sap:content-version="1">
+                <End Type="ZHS_ORGCHART_SRV.OrgUnit" Multiplicity="1" Role="FromRole_OrgUnitToPosition"/>
+                <End Type="ZHS_ORGCHART_SRV.Position" Multiplicity="*" Role="ToRole_OrgUnitToPosition"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_OrgUnitToPosition">
+                        <PropertyRef Name="OrgUnitID"/>
+                    </Principal>
+                    <Dependent Role="ToRole_OrgUnitToPosition">
+                        <PropertyRef Name="OrgUnitID"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <EntityContainer Name="ZHS_ORGCHART_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+                <EntitySet Name="OrgUnitSet" EntityType="ZHS_ORGCHART_SRV.OrgUnit" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+                <EntitySet Name="PositionSet" EntityType="ZHS_ORGCHART_SRV.Position" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+                <EntitySet Name="PersonSet" EntityType="ZHS_ORGCHART_SRV.Person" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+                <AssociationSet Name="PosiitonToPerson_AssocSet" Association="ZHS_ORGCHART_SRV.PosiitonToPerson" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="PositionSet" Role="FromRole_PosiitonToPerson"/>
+                    <End EntitySet="PersonSet" Role="ToRole_PosiitonToPerson"/>
+                </AssociationSet>
+                <AssociationSet Name="OrgUnitToPosition_AssocSet" Association="ZHS_ORGCHART_SRV.OrgUnitToPosition" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="OrgUnitSet" Role="FromRole_OrgUnitToPosition"/>
+                    <End EntitySet="PositionSet" Role="ToRole_OrgUnitToPosition"/>
+                </AssociationSet>
+            </EntityContainer>
+            <atom:link rel="self" href="https://sap01:8443/sap/opu/odata/sap/ZHS_ORGCHART_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+            <atom:link rel="latest-version" href="https://sap01:8443/sap/opu/odata/sap/ZHS_ORGCHART_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

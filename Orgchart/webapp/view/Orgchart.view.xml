@@ -1,0 +1,21 @@
+<mvc:View
+    controllerName="hs.com.orgchart.controller.Orgchart"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    displayBlock="true">
+
+    <Page id="page" title="OrgChart">
+        <content>
+
+            <VBox id="vboxMain" width="100%" renderType="Bare">
+                <HBox id="hboxControls">
+                    
+                </HBox>
+                <core:HTML id="chartHost"/>
+            </VBox>
+
+        </content>
+    </Page>
+
+</mvc:View>
