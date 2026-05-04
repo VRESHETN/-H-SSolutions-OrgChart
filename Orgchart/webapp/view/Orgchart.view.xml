@@ -3,14 +3,29 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
+  
     displayBlock="true">
 
     <Page id="page" title="OrgChart">
         <content>
 
             <VBox id="vboxMain" width="100%" renderType="Bare">
-                <HBox id="hboxControls">
-                    
+                <HBox id="hboxControls" width="100%" alignItems="Center" class="sapUiSmallMargin">
+                    <MultiComboBox
+                        id="nodeFilter"
+                        width="420px"
+                        placeholder="Knoten auswählen"
+                        selectionFinish="onNodeFilterChange"
+                        items="{filterModel>/nodes}">
+                        <core:Item id="_IDGenItem"
+                            key="{filterModel>id}"
+                            text="{filterModel>text}" />
+                    </MultiComboBox>
+
+                    <Button id="_IDGenButton"
+                        text="Filter zurücksetzen"
+                        press="onClearNodeFilter"
+                        class="sapUiTinyMarginBegin" />
                 </HBox>
                 <core:HTML id="chartHost"/>
             </VBox>

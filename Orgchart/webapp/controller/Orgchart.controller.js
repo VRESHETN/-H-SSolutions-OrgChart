@@ -1,6 +1,7 @@
 sap.ui.define([
-  "sap/ui/core/mvc/Controller"
-], function (Controller) {
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel"
+], function (Controller,JSONModel) {
   "use strict"
 
   return Controller.extend("hs.com.orgchart.controller.Orgchart", {
@@ -14,6 +15,7 @@ sap.ui.define([
       this._orgLoaded = false
       this._detailsLoaded = false
       this._skillsLoaded = false
+      this._allNodes = []
       this.onLoad()
     },
 
@@ -145,6 +147,8 @@ sap.ui.define([
         this._nodeMap[node.id] = node
       }.bind(this))
 
+      this._allNodes = nodes
+      this._prepareNodeFilter(nodes)
       this.initChart(nodes)
     },
 
@@ -154,6 +158,7 @@ sap.ui.define([
         template: "ula_custom_emp",
         nodeTreeMenu: false,
         enableSearch: true,
+        searchFields: ["name", "title", "skill_1", "skill_2", "skill_3"],
         mouseScrool: OrgChart.action.zoom,
         nodeMouseClick: OrgChart.action.none,
         scaleInitial: OrgChart.match.boundary,
@@ -402,6 +407,103 @@ sap.ui.define([
         }, 50)
       }.bind(this))
     },
+
+   _prepareNodeFilter: function (nodes) {
+      var filterNodes = nodes
+        .filter(function (node) {
+          return node.tags && node.tags.indexOf("unit") !== -1
+        })
+        .map(function (node) {
+          return {
+            id: node.id,
+            text: node.name || node.id
+          }
+        })
+
+      var filterModel = new JSONModel({
+        nodes: filterNodes
+      })
+
+      this.getView().setModel(filterModel, "filterModel")
+    },
+
+    onNodeFilterChange: function (event) {
+      var selectedItems = event.getSource().getSelectedItems()
+      var selectedIds = selectedItems.map(function (item) {
+        return item.getKey()
+      })
+
+      if (!selectedIds.length) {
+        this._chart.load(this._allNodes)
+        return
+      }
+
+      var filteredNodes = this._getFilteredNodesWithParentsAndChildren(selectedIds)
+
+      this._nodeMap = {}
+      filteredNodes.forEach(function (node) {
+        this._nodeMap[node.id] = node
+      }.bind(this))
+
+      this._chart.load(filteredNodes)
+    },
+
+    onClearNodeFilter: function () {
+      var filter = this.byId("nodeFilter")
+
+      filter.removeAllSelectedItems()
+
+      this._nodeMap = {}
+      this._allNodes.forEach(function (node) {
+        this._nodeMap[node.id] = node
+      }.bind(this))
+
+      if (this._chart) {
+        this._chart.load(this._allNodes)
+      }
+    },
+
+   _getFilteredNodesWithParentsAndChildren: function (selectedIds) {
+  var resultMap = {}
+  var nodeMap = {}
+  var childrenMap = {}
+
+  this._allNodes.forEach(function (node) {
+    nodeMap[node.id] = node
+
+    if (node.pid) {
+      if (!childrenMap[node.pid]) {
+        childrenMap[node.pid] = []
+      }
+
+      childrenMap[node.pid].push(node)
+    }
+  })
+
+  function addChildren(node) {
+    resultMap[node.id] = node
+
+    var children = childrenMap[node.id] || []
+
+    children.forEach(function (child) {
+      addChildren(child)
+    })
+  }
+
+  selectedIds.forEach(function (selectedId) {
+    var selectedNode = nodeMap[selectedId]
+
+    if (!selectedNode) {
+      return
+    }
+
+    addChildren(selectedNode)
+  })
+
+  return this._allNodes.filter(function (node) {
+    return !!resultMap[node.id]
+  })
+},
 
     _buildTeamsUrl: function (email) {
       if (!email) {

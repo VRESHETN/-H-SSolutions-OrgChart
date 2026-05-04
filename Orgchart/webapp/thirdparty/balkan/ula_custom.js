@@ -28,7 +28,7 @@ OrgChart.templates.ula_custom_emp.field_0 =
   '<text data-width="200" data-text-overflow="multiline" style="font-size:18px;font-weight:700;" fill="#102a43" x="98" y="42">{val}</text>'
 
 OrgChart.templates.ula_custom_emp.field_1 =
-  '<text data-width="200" data-text-overflow="ellipsis" style="font-size:13px;font-weight:600;" fill="#0a6ed1" x="98" y="66">{val}</text>'
+  '<text data-width="200" data-text-overflow="ellipsis" style="font-size:13px;font-weight:600;" fill="#0a6ed1" x="98" y="88">{val}</text>'
 
 OrgChart.templates.ula_custom_emp.field_2 = ''
 
