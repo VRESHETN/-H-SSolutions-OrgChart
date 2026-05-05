@@ -1,32 +1,33 @@
-<mvc:View
-    controllerName="hs.com.orgchart.controller.Orgchart"
+<mvc:View controllerName="hs.com.orgchart.controller.Orgchart"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:core="sap.ui.core"
-  
-    displayBlock="true">
+    xmlns:core="sap.ui.core" displayBlock="true">
 
     <Page id="page" title="OrgChart">
         <content>
 
             <VBox id="vboxMain" width="100%" renderType="Bare">
                 <HBox id="hboxControls" width="100%" alignItems="Center" class="sapUiSmallMargin">
-                    <MultiComboBox
-                        id="nodeFilter"
-                        width="420px"
-                        placeholder="Knoten auswählen"
-                        selectionFinish="onNodeFilterChange"
-                        items="{filterModel>/nodes}">
-                        <core:Item id="_IDGenItem"
-                            key="{filterModel>id}"
-                            text="{filterModel>text}" />
+                    <MultiComboBox id="nodeFilter" width="420px" placeholder="Knoten auswählen" selectionFinish="onNodeFilterChange" items="{filterModel>/nodes}">
+                        <core:Item id="_IDGenItem" key="{filterModel>id}" text="{filterModel>text}" />
                     </MultiComboBox>
 
-                    <Button id="_IDGenButton"
-                        text="Filter zurücksetzen"
-                        press="onClearNodeFilter"
-                        class="sapUiTinyMarginBegin" />
+                    <Button id="_IDGenButton" text="Filter zurücksetzen" press="onClearNodeFilter" class="sapUiTinyMarginBegin" />
                 </HBox>
+                <SearchField id="employeeSearch" width="420px" placeholder="Mitarbeiter, Rolle oder Kompetenz suchen" value="{searchModel>/query}" liveChange=".onEmployeeSearch" search=".onEmployeeSearch" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom" />
+
+                <List id="employeeSearchResults" visible="{searchModel>/visible}" items="{searchModel>/results}" width="420px" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <CustomListItem type="Active" press=".onEmployeeSearchResultPress">
+                        <HBox alignItems="Center" class="sapUiSmallMargin">
+                            <Avatar src="{searchModel>photo_url}" displaySize="S" class="sapUiTinyMarginEnd" />
+
+                            <VBox>
+                                <Text text="{searchModel>name}" />
+                                <Text text="{searchModel>matched_skill}" />
+                            </VBox>
+                        </HBox>
+                    </CustomListItem>
+                </List>
                 <core:HTML id="chartHost"/>
             </VBox>
 
