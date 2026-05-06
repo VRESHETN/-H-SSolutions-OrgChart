@@ -76,7 +76,7 @@ OrgChart.templates.ula_custom_unit.size = [320, 120]
 
 OrgChart.templates.ula_custom_unit.node =
   '<g>' +
-  '<rect x="0" y="0" width="320" height="120" rx="18" ry="18" fill="#245b93" stroke="#1e4b79" stroke-width="1.2" filter="url(#ula_custom_emp_shadow)"></rect>' +
+  '<rect x="0" y="0" width="350" height="150" rx="18" ry="18" fill="#0a6ed1" stroke="#085caf" stroke-width="1.2" filter="url(#ula_custom_emp_shadow)"></rect>' +
   '</g>'
 
 OrgChart.templates.ula_custom_unit.img_0 = ''
@@ -168,9 +168,6 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     node +=
       '<rect x="18" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
       '<circle cx="60" cy="' + (y + 42) + '" r="28" fill="#edf4ff"></circle>'
-    // '<rect x="30" y="' + (y + 82) + '" width="96" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#d6e9ff" stroke-width="1"></rect>' +
-    // '<rect x="138" y="' + (y + 82) + '" width="96" height="34" rx="10" ry="10" fill="#f3f6fa" stroke="#e1e8f0" stroke-width="1"></rect>' +
-    // '<rect x="246" y="' + (y + 82) + '" width="96" height="34" rx="10" ry="10" fill="#eefbf3" stroke="#d6f2df" stroke-width="1"></rect>'
   }
 
   node += '</g>'
@@ -212,6 +209,9 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   OrgChart.templates[templateName].field_15 =
     '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#1f7a45" x="294" y="202" text-anchor="middle">{val}</text>'
 
+  OrgChart.templates[templateName].field_10 =
+    '<rect class="hs-team-member-click" data-member-id="{val}" x="18" y="96" width="394" height="128" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+
   for (var index = 1; index <= memberCount - 1; index++) {
     var base = 20 + (index - 1) * 9
     var imageIndex = index + 1
@@ -243,9 +243,37 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
 
     OrgChart.templates[templateName]["field_" + (base + 8)] =
       '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#1f7a45" x="294" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
+
+    OrgChart.templates[templateName]["field_" + (base + 5)] =
+      '<rect class="hs-team-member-click" data-member-id="{val}" x="18" y="' + rowY + '" width="394" height="128" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
   }
 
   OrgChart.templates[templateName].link =
     '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
     '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
 }
+
+OrgChart.templates.ula_custom_empty_team = Object.assign({}, OrgChart.templates.ula)
+
+OrgChart.templates.ula_custom_empty_team.size = [430, 96]
+
+OrgChart.templates.ula_custom_empty_team.node =
+  '<g>' +
+  '<rect x="0" y="0" width="430" height="96" rx="20" ry="20" fill="#ffffff" stroke="#0a6ed1" stroke-width="7" filter="url(#ula_custom_emp_shadow)"></rect>' +
+  '<rect x="0" y="0" width="430" height="78" rx="20" ry="20" fill="#0a6ed1"></rect>' +
+  '<rect x="0" y="56" width="430" height="24" fill="#0a6ed1"></rect>' +
+  '</g>'
+
+OrgChart.templates.ula_custom_empty_team.field_0 =
+  '<text data-width="370" data-text-overflow="ellipsis" style="font-size:18px;font-weight:800;" fill="#ffffff" x="215" y="36" text-anchor="middle">{val}</text>'
+
+OrgChart.templates.ula_custom_empty_team.field_1 = ''
+OrgChart.templates.ula_custom_empty_team.field_2 = ''
+OrgChart.templates.ula_custom_empty_team.field_3 = ''
+OrgChart.templates.ula_custom_empty_team.field_4 = ''
+OrgChart.templates.ula_custom_empty_team.field_5 = ''
+OrgChart.templates.ula_custom_empty_team.img_0 = ''
+
+OrgChart.templates.ula_custom_empty_team.link =
+  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
+  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'

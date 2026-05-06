@@ -108,7 +108,6 @@ sap.ui.define([
 
     onData: function (response) {
       var rows = response.results || []
-
       var originalNodes = rows.map(function (item) {
         var isEmp = item.NodeType !== "O" && item.NodeType !== "S"
         var detail = this._detailMap[item.NodeId] || {}
@@ -133,8 +132,9 @@ sap.ui.define([
         return {
           id: item.NodeId,
           pid: item.ParentId || "",
+          node_type: item.NodeType,
           name: this._sanitizeText(item.Name || ""),
-          title: this._sanitizeText(item.Title || ""),
+          title: this._sanitizeRoleTitle(item.Title || ""),
           email: email,
           phone: phone,
           photo_url: photoUrl,
@@ -183,34 +183,12 @@ sap.ui.define([
         mouseScrool: OrgChart.action.zoom,
         nodeMouseClick: OrgChart.action.none,
         scaleInitial: OrgChart.match.boundary,
-        padding: 50,
-        levelSeparation: 80,
-        siblingSeparation: 55,
-        subtreeSeparation: 120,
+        padding: 80,
+        levelSeparation: 130,
+        siblingSeparation: 110,
+        subtreeSeparation: 300,
         nodeBinding: nodeBinding,
-        // nodeBinding: {
-        //   field_0: "name",
-        //   field_1: "title",
-        //   field_2: "leader_name",
-        //   field_3: "emp_1_name",
-        //   field_4: "emp_2_name",
-        //   field_5: "emp_3_name",
-        //   img_0: "photo_url",
-        //   img_1: "leader_photo",
-        //   img_2: "emp_1_photo",
-        //   img_3: "emp_2_photo",
-        //   img_4: "emp_3_photo",
-        //   img_5: "emp_4_photo"
-        // },
-
         nodes: nodes,
-        // tags: {
-        //   unit: { template: "ula_custom_unit" },
-        //   pos: { template: "ula_custom_pos" },
-        //   emp: { template: "ula_custom_emp" },
-        //   emp_noskills: { template: "ula_custom_emp_noskills" },
-        //   team: { template: "ula_custom_team" }
-        // },
         tags: chartTags,
         toolbar: {
           zoom: true,
@@ -229,11 +207,6 @@ sap.ui.define([
         }
       })
       this._registerTeamMemberClick()
-      /*this._chart.on("redraw", function () {
-        setTimeout(function () {
-          this._drawTeamFrames()
-        }.bind(this), 100)
-      }.bind(this))*/
 
       this._chart.on("click", function (sender, args) {
         var event = args.event || window.event
@@ -462,7 +435,7 @@ sap.ui.define([
     _prepareNodeFilter: function (nodes) {
       var filterNodes = nodes
         .filter(function (node) {
-          return node.tags && node.tags.indexOf("unit") !== -1
+          return node.node_type === "O"
         })
         .map(function (node) {
           return {
@@ -621,6 +594,8 @@ sap.ui.define([
       var nodeMap = {}
       var childrenMap = {}
       var hiddenIds = {}
+      var rootIds = {}
+      var rootId = ""
 
       nodes.forEach(function (node) {
         nodeMap[node.id] = node
@@ -634,50 +609,170 @@ sap.ui.define([
         }
       })
 
-      nodes.forEach(function (leader) {
-        var isLeader = leader.id && leader.id.indexOf("LP") === 0
+      nodes.forEach(function (node) {
+        if (node.node_type === "O" && (!node.pid || !nodeMap[node.pid])) {
+          rootIds[node.id] = true
+          rootId = node.id
+        }
+      })
 
-        if (!isLeader) {
+      if (rootId) {
+        var rootChildren = childrenMap[rootId] || []
+        var managementMembers = []
+
+        rootChildren.forEach(function (child) {
+          var isEmployee = child.tags &&
+            (child.tags.indexOf("emp") !== -1 || child.tags.indexOf("emp_noskills") !== -1)
+
+          if (child.id && child.id.indexOf("LP") === 0) {
+            managementMembers.push(child)
+            return
+          }
+
+          if (isEmployee) {
+            managementMembers.push(child)
+          }
+        })
+
+        if (managementMembers.length) {
+          var managementNode = {
+            id: "ROOT_MANAGEMENT",
+            pid: rootId,
+            node_type: "O",
+            name: "Geschäftsführung",
+            title: "Unternehmensleitung",
+            photo_url: "",
+            tags: ["team_" + String(managementMembers.length)],
+            member_count: managementMembers.length
+          }
+
+          for (var clearIndex = 1; clearIndex <= 20; clearIndex++) {
+            managementNode["emp_" + clearIndex + "_id"] = ""
+            managementNode["emp_" + clearIndex + "_name"] = ""
+            managementNode["emp_" + clearIndex + "_title"] = ""
+            managementNode["emp_" + clearIndex + "_photo"] = ""
+            managementNode["emp_" + clearIndex + "_skill_1"] = ""
+            managementNode["emp_" + clearIndex + "_skill_2"] = ""
+            managementNode["emp_" + clearIndex + "_skill_3"] = ""
+            managementNode["emp_" + clearIndex + "_skill_1_visible"] = "0"
+            managementNode["emp_" + clearIndex + "_skill_2_visible"] = "0"
+            managementNode["emp_" + clearIndex + "_skill_3_visible"] = "0"
+          }
+
+          var leader = managementMembers[0]
+
+          managementNode.leader_id = leader.id
+          managementNode.leader_name = leader.name || ""
+          managementNode.leader_title = leader.title || ""
+          managementNode.leader_photo = leader.photo_url || ""
+          managementNode.leader_skill_1 = leader.skill_1 || ""
+          managementNode.leader_skill_2 = leader.skill_2 || ""
+          managementNode.leader_skill_3 = leader.skill_3 || ""
+          managementNode.leader_skill_1_visible = leader.skill_1 ? "1" : "0"
+          managementNode.leader_skill_2_visible = leader.skill_2 ? "1" : "0"
+          managementNode.leader_skill_3_visible = leader.skill_3 ? "1" : "0"
+
+          managementMembers.slice(1).forEach(function (employee, index) {
+            var number = index + 1
+
+            managementNode["emp_" + number + "_id"] = employee.id
+            managementNode["emp_" + number + "_name"] = employee.name || ""
+            managementNode["emp_" + number + "_title"] = employee.title || ""
+            managementNode["emp_" + number + "_photo"] = employee.photo_url || ""
+            managementNode["emp_" + number + "_skill_1"] = employee.skill_1 || ""
+            managementNode["emp_" + number + "_skill_2"] = employee.skill_2 || ""
+            managementNode["emp_" + number + "_skill_3"] = employee.skill_3 || ""
+            managementNode["emp_" + number + "_skill_1_visible"] = employee.skill_1 ? "1" : "0"
+            managementNode["emp_" + number + "_skill_2_visible"] = employee.skill_2 ? "1" : "0"
+            managementNode["emp_" + number + "_skill_3_visible"] = employee.skill_3 ? "1" : "0"
+          })
+
+          managementMembers.forEach(function (employee) {
+            hiddenIds[employee.id] = true
+          })
+
+          nodes.forEach(function (node) {
+            if (node.node_type === "O" && node.pid === rootId) {
+              node.pid = managementNode.id
+            }
+          })
+
+          nodes.push(managementNode)
+          nodeMap[managementNode.id] = managementNode
+        }
+      }
+
+      nodes.forEach(function (teamNode) {
+        if (teamNode.node_type !== "O") {
           return
         }
 
-        var employees = childrenMap[leader.id] || []
+        if (rootIds[teamNode.id]) {
+          teamNode.tags = ["unit"]
+          return
+        }
 
-        employees = employees.filter(function (child) {
+        if (teamNode.id === "ROOT_MANAGEMENT") {
+          return
+        }
+
+        var children = childrenMap[teamNode.id] || []
+        var leader = null
+        var directEmployees = []
+
+        children.forEach(function (child) {
+          var isEmployee = child.tags &&
+            (child.tags.indexOf("emp") !== -1 || child.tags.indexOf("emp_noskills") !== -1)
+
+          if (child.id && child.id.indexOf("LP") === 0) {
+            leader = child
+            return
+          }
+
+          if (isEmployee) {
+            directEmployees.push(child)
+          }
+        })
+
+        if (!leader && directEmployees.length === 1) {
+          leader = directEmployees[0]
+          directEmployees = []
+        }
+
+        if (!leader) {
+          teamNode.tags = ["empty_team"]
+          return
+        }
+
+        var leaderChildren = childrenMap[leader.id] || []
+
+        var employees = leaderChildren.filter(function (child) {
           return child.tags &&
             (child.tags.indexOf("emp") !== -1 || child.tags.indexOf("emp_noskills") !== -1) &&
             child.id !== leader.id
         })
 
-        if (!employees.length) {
-          return
-        }
+        directEmployees.forEach(function (employee) {
+          var exists = employees.some(function (item) {
+            return item.id === employee.id
+          })
 
-        var teamNode = leader.pid ? nodeMap[leader.pid] : null
+          if (!exists && employee.id !== leader.id) {
+            employees.push(employee)
+          }
+        })
 
-        if (!teamNode) {
-          return
-        }
+        leaderChildren.forEach(function (child) {
+          if (child.node_type === "O") {
+            child.pid = teamNode.id
+          }
+        })
 
         hiddenIds[leader.id] = true
 
         employees.forEach(function (employee) {
           hiddenIds[employee.id] = true
         })
-
-        teamNode.member_count = employees.length + 1
-        teamNode.leader_id = leader.id
-        teamNode.leader_name = leader.name || ""
-        teamNode.leader_title = leader.title || ""
-        teamNode.leader_photo = leader.photo_url || ""
-        teamNode.leader_skill_1 = leader.skill_1 || ""
-        teamNode.leader_skill_2 = leader.skill_2 || ""
-        teamNode.leader_skill_3 = leader.skill_3 || ""
-        teamNode.leader_marker = "👑"
-        teamNode.leader_skill_1_visible = leader.skill_1 ? "1" : "0"
-        teamNode.leader_skill_2_visible = leader.skill_2 ? "1" : "0"
-        teamNode.leader_skill_3_visible = leader.skill_3 ? "1" : "0"
-        teamNode.tags = ["team_" + String(teamNode.member_count)]
 
         for (var clearIndex = 1; clearIndex <= 20; clearIndex++) {
           teamNode["emp_" + clearIndex + "_id"] = ""
@@ -691,6 +786,18 @@ sap.ui.define([
           teamNode["emp_" + clearIndex + "_skill_2_visible"] = "0"
           teamNode["emp_" + clearIndex + "_skill_3_visible"] = "0"
         }
+
+        teamNode.member_count = employees.length + 1
+        teamNode.leader_id = leader.id
+        teamNode.leader_name = leader.name || ""
+        teamNode.leader_title = leader.title || ""
+        teamNode.leader_photo = leader.photo_url || ""
+        teamNode.leader_skill_1 = leader.skill_1 || ""
+        teamNode.leader_skill_2 = leader.skill_2 || ""
+        teamNode.leader_skill_3 = leader.skill_3 || ""
+        teamNode.leader_skill_1_visible = leader.skill_1 ? "1" : "0"
+        teamNode.leader_skill_2_visible = leader.skill_2 ? "1" : "0"
+        teamNode.leader_skill_3_visible = leader.skill_3 ? "1" : "0"
 
         employees.forEach(function (employee, index) {
           var number = index + 1
@@ -707,39 +814,7 @@ sap.ui.define([
           teamNode["emp_" + number + "_skill_3_visible"] = employee.skill_3 ? "1" : "0"
         })
 
-        teamNode.search_display = [
-          teamNode.leader_name,
-          teamNode.leader_title,
-          teamNode.leader_skill_1,
-          teamNode.leader_skill_2,
-          teamNode.leader_skill_3
-        ].concat(
-          employees.map(function (employee) {
-            return [
-              employee.name,
-              employee.title,
-              employee.skill_1,
-              employee.skill_2,
-              employee.skill_3
-            ].join(" ")
-          })
-        ).join(" | ")
-
-        teamNode.search_name = employees.map(function (employee) {
-          return employee.name || ""
-        }).join(" | ")
-
-        teamNode.search_title = employees.map(function (employee) {
-          return employee.title || ""
-        }).join(" | ")
-
-        teamNode.search_skills = employees.map(function (employee) {
-          return [
-            employee.skill_1,
-            employee.skill_2,
-            employee.skill_3
-          ].join(" ")
-        }).join(" | ")
+        teamNode.tags = ["team_" + String(teamNode.member_count)]
       })
 
       return nodes.filter(function (node) {
@@ -753,6 +828,18 @@ sap.ui.define([
 
         return true
       })
+    },
+
+    _sanitizeRoleTitle: function (value) {
+      var text = this._sanitizeText(value)
+
+      if (!text) {
+        return ""
+      }
+
+      text = text.replace(/\s*\d+\s*$/g, "")
+
+      return text.trim()
     },
 
     _createNodeBinding: function () {
@@ -800,7 +887,9 @@ sap.ui.define([
         unit: { template: "ula_custom_unit" },
         pos: { template: "ula_custom_pos" },
         emp: { template: "ula_custom_emp" },
-        emp_noskills: { template: "ula_custom_emp_noskills" }
+        emp_noskills: { template: "ula_custom_emp_noskills" },
+        empty_team: { template: "ula_custom_empty_team" },
+        empty_team: { template: "ula_custom_empty_team" }
       }
 
       nodes.forEach(function (node) {
@@ -1093,36 +1182,6 @@ sap.ui.define([
       wrapper.appendChild(topSection)
       wrapper.appendChild(content)
       fieldsContainer.appendChild(wrapper)
-    },
-
-
-    _createSearchFields: function () {
-      var searchFields = [
-        "name",
-        "title",
-        "skill_1",
-        "skill_2",
-        "skill_3",
-        "leader_name",
-        "leader_title",
-        "leader_skill_1",
-        "leader_skill_2",
-        "leader_skill_3",
-        "search_display",
-        "search_name",
-        "search_title",
-        "search_skills"
-      ]
-
-      for (var index = 1; index <= 20; index++) {
-        searchFields.push("emp_" + index + "_name")
-        searchFields.push("emp_" + index + "_title")
-        searchFields.push("emp_" + index + "_skill_1")
-        searchFields.push("emp_" + index + "_skill_2")
-        searchFields.push("emp_" + index + "_skill_3")
-      }
-
-      return searchFields
     },
 
     onEmployeeSearch: function (event) {

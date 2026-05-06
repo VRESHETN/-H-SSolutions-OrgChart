@@ -17,13 +17,13 @@
                 <SearchField id="employeeSearch" width="420px" placeholder="Mitarbeiter, Rolle oder Kompetenz suchen" value="{searchModel>/query}" liveChange=".onEmployeeSearch" search=".onEmployeeSearch" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom" />
 
                 <List id="employeeSearchResults" visible="{searchModel>/visible}" items="{searchModel>/results}" width="420px" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <CustomListItem type="Active" press=".onEmployeeSearchResultPress">
-                        <HBox alignItems="Center" class="sapUiSmallMargin">
-                            <Avatar src="{searchModel>photo_url}" displaySize="S" class="sapUiTinyMarginEnd" />
+                    <CustomListItem id="_IDGenCustomListItem" type="Active" press=".onEmployeeSearchResultPress">
+                        <HBox id="_IDGenHBox" alignItems="Center" class="sapUiSmallMargin">
+                            <Avatar id="_IDGenAvatar" src="{searchModel>photo_url}" displaySize="S" class="sapUiTinyMarginEnd" />
 
-                            <VBox>
-                                <Text text="{searchModel>name}" />
-                                <Text text="{searchModel>matched_skill}" />
+                            <VBox id="_IDGenVBox1">
+                                <Text id="_IDGenText" text="{searchModel>name}" />
+                                <Text id="_IDGenText1" text="{searchModel>matched_skill}" />
                             </VBox>
                         </HBox>
                     </CustomListItem>
