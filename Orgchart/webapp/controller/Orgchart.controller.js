@@ -169,23 +169,21 @@ sap.ui.define([
 
     initChart: function (nodes) {
       this._prepareTeamTemplates(nodes)
+
       var nodeBinding = this._createNodeBinding()
       var chartTags = this._createChartTags(nodes)
-      // var searchFields = this._createSearchFields()
+
       this._chart = new OrgChart(document.getElementById("tree"), {
         layout: OrgChart.layout.tree,
-
         template: "ula_custom_emp",
         nodeTreeMenu: false,
-        // enableSearch: true,
-        // searchFields: searchFields,
         enableSearch: false,
         mouseScrool: OrgChart.action.zoom,
         nodeMouseClick: OrgChart.action.none,
         scaleInitial: OrgChart.match.boundary,
         padding: 80,
-        levelSeparation: 130,
-        siblingSeparation: 110,
+        levelSeparation: 120,
+        siblingSeparation: 180,
         subtreeSeparation: 300,
         nodeBinding: nodeBinding,
         nodes: nodes,
@@ -206,24 +204,10 @@ sap.ui.define([
           }
         }
       })
+
       this._registerTeamMemberClick()
 
       this._chart.on("click", function (sender, args) {
-        var event = args.event || window.event
-        var target = event && event.target
-        var memberElement = target && target.closest ? target.closest(".hs-team-member-click") : null
-
-        if (memberElement) {
-          var memberId = memberElement.getAttribute("data-member-id")
-          var memberNode = this._nodeMap[memberId]
-
-          if (memberNode) {
-            this._chart.editUI.show(memberNode.id)
-          }
-
-          return false
-        }
-
         var node = args.node
 
         if (!node) {
@@ -240,195 +224,17 @@ sap.ui.define([
       this._chart.editUI.on("show", function (sender, nodeId) {
         var node = this._nodeMap[nodeId]
 
-        if (!node || !node.tags || (node.tags.indexOf("emp") === -1 && node.tags.indexOf("emp_noskills") === -1)) {
+        if (!node || !node.tags) {
+          return
+        }
+
+        if (node.tags.indexOf("emp") === -1 && node.tags.indexOf("emp_noskills") === -1) {
           return
         }
 
         setTimeout(function () {
-          var form = document.querySelector(".boc-edit-form")
-          if (!form) {
-            return
-          }
-
-          var header = form.querySelector(".boc-edit-form-header")
-          var body = form.querySelector(".boc-edit-form-body")
-          var contentArea = form.querySelector(".boc-edit-form-content")
-          var fieldsContainer = form.querySelector(".boc-edit-form-fields")
-
-          if (!fieldsContainer) {
-            return
-          }
-
-          form.classList.add("hs-orgchart-popup")
-
-          if (header) {
-            header.classList.add("hs-orgchart-popup-header")
-            header.textContent = "Mitarbeiterprofil"
-          }
-
-          if (body) {
-            body.classList.add("hs-orgchart-popup-body")
-          }
-
-          if (contentArea) {
-            contentArea.classList.add("hs-orgchart-popup-content")
-          }
-
-          fieldsContainer.className = "boc-edit-form-fields hs-orgchart-popup-fields"
-          fieldsContainer.innerHTML = ""
-
-          var wrapper = document.createElement("div")
-          wrapper.className = "hs-orgchart-profile"
-
-          var topSection = document.createElement("div")
-          topSection.className = "hs-orgchart-profile-top"
-
-          var image = document.createElement("img")
-          image.className = "hs-orgchart-profile-image"
-          image.src = node.photo_url || ""
-          image.alt = node.name || ""
-
-          if (!node.photo_url) {
-            image.style.display = "none"
-          }
-
-          var identity = document.createElement("div")
-          identity.className = "hs-orgchart-profile-identity"
-
-          var nameEl = document.createElement("div")
-          nameEl.className = "hs-orgchart-profile-name"
-          nameEl.textContent = node.name || ""
-
-          var roleEl = document.createElement("div")
-          roleEl.className = "hs-orgchart-profile-role"
-          roleEl.textContent = node.title || ""
-
-          identity.appendChild(nameEl)
-          identity.appendChild(roleEl)
-
-          topSection.appendChild(image)
-          topSection.appendChild(identity)
-
-          var content = document.createElement("div")
-          content.className = "hs-orgchart-profile-content"
-
-          function createInfoCard(labelText, valueNode) {
-            var row = document.createElement("div")
-            row.className = "hs-orgchart-info-row"
-
-            var label = document.createElement("div")
-            label.className = "hs-orgchart-info-label"
-            label.textContent = labelText
-
-            row.appendChild(label)
-            row.appendChild(valueNode)
-
-            return row
-          }
-
-          function createTextValue(text) {
-            var value = document.createElement("div")
-            value.className = "hs-orgchart-text-value"
-            value.textContent = text
-            return value
-          }
-
-          function createLink(text, href, extraClass, targetBlank) {
-            var link = document.createElement("a")
-            link.className = "hs-orgchart-link " + (extraClass || "")
-            link.href = href
-            link.textContent = text
-
-            if (targetBlank) {
-              link.target = "_blank"
-              link.rel = "noopener noreferrer"
-            }
-
-            return link
-          }
-
-          function createActionButton(text, href, modifierClass) {
-            var link = document.createElement("a")
-            link.className = "hs-orgchart-action-button " + (modifierClass || "")
-            link.href = href
-            link.textContent = text
-            link.target = "_blank"
-            link.rel = "noopener noreferrer"
-            return link
-          }
-
-          function createSkillsTable(skills) {
-            var section = document.createElement("div")
-            section.className = "hs-orgchart-skills-table"
-
-            if (!skills || !skills.length) {
-              section.appendChild(createTextValue("Keine Kompetenzen vorhanden"))
-              return section
-            }
-
-            var table = document.createElement("div")
-            table.className = "hs-orgchart-skills-grid"
-
-            skills.forEach(function (skill, index) {
-              var row = document.createElement("div")
-              row.className = "hs-orgchart-skill-row"
-
-              var indexCell = document.createElement("div")
-              indexCell.className = "hs-orgchart-skill-index"
-              indexCell.textContent = String(index + 1)
-
-              var valueCell = document.createElement("div")
-              valueCell.className = "hs-orgchart-skill-value"
-              valueCell.textContent = skill
-
-              row.appendChild(indexCell)
-              row.appendChild(valueCell)
-              table.appendChild(row)
-            })
-
-            section.appendChild(table)
-            return section
-          }
-
-          if (node.email) {
-            content.appendChild(
-              createInfoCard(
-                "E-Mail",
-                createLink(node.email, "mailto:" + node.email, "hs-orgchart-link-primary", false)
-              )
-            )
-          }
-
-          if (node.phone) {
-            content.appendChild(
-              createInfoCard(
-                "Telefon",
-                createLink(node.phone, "tel:" + node.phone, "hs-orgchart-link-dark", false)
-              )
-            )
-          }
-
-          if (node.teams_url) {
-            var actionsWrap = document.createElement("div")
-            actionsWrap.className = "hs-orgchart-actions"
-
-            actionsWrap.appendChild(
-              createActionButton("In Teams öffnen", node.teams_url, "hs-orgchart-action-button-primary")
-            )
-
-            content.appendChild(createInfoCard("Aktionen", actionsWrap))
-          }
-
-          if (node.skills && node.skills.length) {
-            content.appendChild(
-              createInfoCard("Kompetenzen", createSkillsTable(node.skills))
-            )
-          }
-
-          wrapper.appendChild(topSection)
-          wrapper.appendChild(content)
-          fieldsContainer.appendChild(wrapper)
-        }, 50)
+          this._renderEmployeeProfile(node)
+        }.bind(this), 50)
       }.bind(this))
     },
 
@@ -474,8 +280,22 @@ sap.ui.define([
 
     onClearNodeFilter: function () {
       var filter = this.byId("nodeFilter")
+      var search = this.byId("employeeSearch")
+      var searchModel = this.getView().getModel("searchModel")
 
-      filter.removeAllSelectedItems()
+      if (filter) {
+        filter.removeAllSelectedItems()
+      }
+
+      if (search) {
+        search.setValue("")
+      }
+
+      if (searchModel) {
+        searchModel.setProperty("/query", "")
+        searchModel.setProperty("/results", [])
+        searchModel.setProperty("/visible", false)
+      }
 
       this._nodeMap = {}
       this._allNodes.forEach(function (node) {
@@ -888,7 +708,6 @@ sap.ui.define([
         pos: { template: "ula_custom_pos" },
         emp: { template: "ula_custom_emp" },
         emp_noskills: { template: "ula_custom_emp_noskills" },
-        empty_team: { template: "ula_custom_empty_team" },
         empty_team: { template: "ula_custom_empty_team" }
       }
 
@@ -956,46 +775,6 @@ sap.ui.define([
         event.stopPropagation()
       }.bind(this)
     },
-
-    _openEmployeePopupFromNode: function (node) {
-      if (!node) {
-        return
-      }
-
-      this._chart.editUI.show(node.id)
-
-      setTimeout(function () {
-        var form = document.querySelector(".boc-edit-form")
-
-        if (!form) {
-          return
-        }
-
-        var fieldsContainer = form.querySelector(".boc-edit-form-fields")
-
-        if (!fieldsContainer) {
-          return
-        }
-
-        fieldsContainer.innerHTML = ""
-
-        var wrapper = document.createElement("div")
-        wrapper.className = "hs-orgchart-profile"
-
-        var nameEl = document.createElement("div")
-        nameEl.className = "hs-orgchart-profile-name"
-        nameEl.textContent = node.name || ""
-
-        var roleEl = document.createElement("div")
-        roleEl.className = "hs-orgchart-profile-role"
-        roleEl.textContent = node.title || ""
-
-        wrapper.appendChild(nameEl)
-        wrapper.appendChild(roleEl)
-        fieldsContainer.appendChild(wrapper)
-      }, 50)
-    },
-
 
     _renderEmployeeProfile: function (node) {
       var form = document.querySelector(".boc-edit-form")

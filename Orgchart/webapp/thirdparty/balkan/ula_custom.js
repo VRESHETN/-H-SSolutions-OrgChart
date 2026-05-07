@@ -72,7 +72,7 @@ OrgChart.templates.ula_custom_emp_noskills.field_5 = ''
 OrgChart.templates.ula_custom_emp_noskills.link = OrgChart.templates.ula_custom_emp.link
 
 OrgChart.templates.ula_custom_unit = Object.assign({}, OrgChart.templates.ula_custom_emp)
-OrgChart.templates.ula_custom_unit.size = [320, 120]
+OrgChart.templates.ula_custom_unit.size = [350, 150]
 
 OrgChart.templates.ula_custom_unit.node =
   '<g>' +
@@ -82,10 +82,10 @@ OrgChart.templates.ula_custom_unit.node =
 OrgChart.templates.ula_custom_unit.img_0 = ''
 
 OrgChart.templates.ula_custom_unit.field_0 =
-  '<text data-width="272" data-text-overflow="multiline" style="font-size:18px;font-weight:700;" fill="#ffffff" x="24" y="42">{val}</text>'
+  '<text data-width="302" data-text-overflow="multiline" style="font-size:20px;font-weight:800;" fill="#ffffff" x="24" y="60">{val}</text>'
 
 OrgChart.templates.ula_custom_unit.field_1 =
-  '<text data-width="272" data-text-overflow="ellipsis" style="font-size:13px;font-weight:500;" fill="#dbe8f5" x="24" y="68">{val}</text>'
+  '<text data-width="302" data-text-overflow="ellipsis" style="font-size:13px;font-weight:500;" fill="#dbe8f5" x="24" y="88">{val}</text>'
 
 OrgChart.templates.ula_custom_unit.field_2 = ''
 OrgChart.templates.ula_custom_unit.field_3 = ''
@@ -132,13 +132,19 @@ window.HsOrgChartTemplates.createTeamTemplates = function (maxCount) {
 
 window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   var templateName = "ula_custom_team_" + String(memberCount)
-  var width = 430
   var headerHeight = 96
   var rowHeight = 138
   var footer = 18
   var imageSize = 56
   var imageRadius = 28
-  var height = headerHeight + memberCount * rowHeight + footer
+  var maxRowsPerColumn = 4
+  var columnWidth = 430
+  var columnCount = Math.ceil(memberCount / maxRowsPerColumn)
+  var visibleRows = Math.min(memberCount, maxRowsPerColumn)
+  var width = columnWidth * columnCount
+  var height = headerHeight + visibleRows * rowHeight + footer
+  var centerX = width / 2
+  var headerTextWidth = width - 60
 
   OrgChart.templates[templateName] = Object.assign({}, OrgChart.templates.ula)
   OrgChart.templates[templateName].size = [width, height]
@@ -146,11 +152,14 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   var defs = ''
 
   for (var clipIndex = 0; clipIndex < memberCount; clipIndex++) {
-    var clipY = headerHeight + clipIndex * rowHeight + 14
+    var clipColumnIndex = Math.floor(clipIndex / maxRowsPerColumn)
+    var clipRowIndex = clipIndex % maxRowsPerColumn
+    var clipXOffset = clipColumnIndex * columnWidth
+    var clipY = headerHeight + clipRowIndex * rowHeight + 14
 
     defs +=
       '<clipPath id="' + templateName + '_circle_' + clipIndex + '">' +
-      '<circle cx="' + (32 + imageRadius) + '" cy="' + (clipY + imageRadius) + '" r="' + imageRadius + '"></circle>' +
+      '<circle cx="' + (clipXOffset + 60) + '" cy="' + (clipY + imageRadius) + '" r="' + imageRadius + '"></circle>' +
       '</clipPath>'
   }
 
@@ -163,11 +172,14 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     '<rect x="0" y="56" width="' + width + '" height="24" fill="#0a6ed1"></rect>'
 
   for (var row = 0; row < memberCount; row++) {
-    var y = headerHeight + row * rowHeight
+    var columnIndex = Math.floor(row / maxRowsPerColumn)
+    var rowIndex = row % maxRowsPerColumn
+    var xOffset = columnIndex * columnWidth
+    var y = headerHeight + rowIndex * rowHeight
 
     node +=
-      '<rect x="18" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
-      '<circle cx="60" cy="' + (y + 42) + '" r="28" fill="#edf4ff"></circle>'
+      '<rect x="' + (xOffset + 18) + '" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
+      '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="28" fill="#edf4ff"></circle>'
   }
 
   node += '</g>'
@@ -175,10 +187,10 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   OrgChart.templates[templateName].node = node
 
   OrgChart.templates[templateName].field_0 =
-    '<text data-width="370" data-text-overflow="ellipsis" style="font-size:18px;font-weight:800;" fill="#ffffff" x="215" y="32" text-anchor="middle">{val}</text>'
+    '<text data-width="' + headerTextWidth + '" data-text-overflow="ellipsis" style="font-size:18px;font-weight:800;" fill="#ffffff" x="' + centerX + '" y="32" text-anchor="middle">{val}</text>'
 
   OrgChart.templates[templateName].field_1 =
-    '<text data-width="370" data-text-overflow="ellipsis" style="font-size:12px;font-weight:600;" fill="#eaf4ff" x="215" y="56" text-anchor="middle">{val}</text>'
+    '<text data-width="' + headerTextWidth + '" data-text-overflow="ellipsis" style="font-size:12px;font-weight:600;" fill="#eaf4ff" x="' + centerX + '" y="56" text-anchor="middle">{val}</text>'
 
   OrgChart.templates[templateName].img_0 = ''
 
@@ -215,37 +227,40 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   for (var index = 1; index <= memberCount - 1; index++) {
     var base = 20 + (index - 1) * 9
     var imageIndex = index + 1
-    var rowY = headerHeight + index * rowHeight
+    var memberColumnIndex = Math.floor(index / maxRowsPerColumn)
+    var memberRowIndex = index % maxRowsPerColumn
+    var memberXOffset = memberColumnIndex * columnWidth
+    var rowY = headerHeight + memberRowIndex * rowHeight
 
     OrgChart.templates[templateName]["img_" + imageIndex] =
-      '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_circle_' + index + ')" xlink:href="{val}" x="32" y="' + (rowY + 14) + '" width="' + imageSize + '" height="' + imageSize + '"></image>'
+      '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_circle_' + index + ')" xlink:href="{val}" x="' + (memberXOffset + 32) + '" y="' + (rowY + 14) + '" width="' + imageSize + '" height="' + imageSize + '"></image>'
 
     OrgChart.templates[templateName]["field_" + base] =
-      '<text data-width="238" data-text-overflow="ellipsis" style="font-size:15px;font-weight:800;" fill="#102a43" x="104" y="' + (rowY + 36) + '">{val}</text>'
+      '<text data-width="238" data-text-overflow="ellipsis" style="font-size:15px;font-weight:800;" fill="#102a43" x="' + (memberXOffset + 104) + '" y="' + (rowY + 36) + '">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 1)] =
-      '<text data-width="238" data-text-overflow="ellipsis" style="font-size:11px;font-weight:600;" fill="#0a6ed1" x="104" y="' + (rowY + 58) + '">{val}</text>'
+      '<text data-width="238" data-text-overflow="ellipsis" style="font-size:11px;font-weight:600;" fill="#0a6ed1" x="' + (memberXOffset + 104) + '" y="' + (rowY + 58) + '">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 2)] =
-      '<rect x="30" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#d6e9ff" stroke-width="1" opacity="{val}"></rect>'
+      '<rect x="' + (memberXOffset + 30) + '" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#d6e9ff" stroke-width="1" opacity="{val}"></rect>'
 
     OrgChart.templates[templateName]["field_" + (base + 3)] =
-      '<rect x="138" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#f3f6fa" stroke="#e1e8f0" stroke-width="1" opacity="{val}"></rect>'
+      '<rect x="' + (memberXOffset + 138) + '" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#f3f6fa" stroke="#e1e8f0" stroke-width="1" opacity="{val}"></rect>'
 
     OrgChart.templates[templateName]["field_" + (base + 4)] =
-      '<rect x="246" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#eefbf3" stroke="#d6f2df" stroke-width="1" opacity="{val}"></rect>'
+      '<rect x="' + (memberXOffset + 246) + '" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#eefbf3" stroke="#d6f2df" stroke-width="1" opacity="{val}"></rect>'
 
     OrgChart.templates[templateName]["field_" + (base + 6)] =
-      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#245b93" x="78" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
+      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#245b93" x="' + (memberXOffset + 78) + '" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 7)] =
-      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#52606d" x="186" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
+      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#52606d" x="' + (memberXOffset + 186) + '" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 8)] =
-      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#1f7a45" x="294" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
+      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#1f7a45" x="' + (memberXOffset + 294) + '" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 5)] =
-      '<rect class="hs-team-member-click" data-member-id="{val}" x="18" y="' + rowY + '" width="394" height="128" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+      '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (memberXOffset + 18) + '" y="' + rowY + '" width="394" height="128" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
   }
 
   OrgChart.templates[templateName].link =
