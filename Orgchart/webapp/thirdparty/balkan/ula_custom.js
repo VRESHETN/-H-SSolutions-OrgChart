@@ -1,5 +1,5 @@
 OrgChart.templates.ula_custom_emp = Object.assign({}, OrgChart.templates.ula)
-OrgChart.templates.ula_custom_emp.size = [320, 205]
+OrgChart.templates.ula_custom_emp.size = [340, 185]
 
 OrgChart.templates.ula_custom_emp.defs =
   '<filter id="ula_custom_emp_shadow" x="-20%" y="-20%" width="160%" height="160%">' +
@@ -11,65 +11,63 @@ OrgChart.templates.ula_custom_emp.defs =
 
 OrgChart.templates.ula_custom_emp.node =
   '<g>' +
-  '<rect x="0" y="0" width="320" height="205" rx="18" ry="18" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2" filter="url(#ula_custom_emp_shadow)"></rect>' +
-  '<rect x="0" y="0" width="320" height="8" rx="18" ry="18" fill="#0a6ed1"></rect>' +
-  '<rect x="14" y="14" width="292" height="102" rx="14" ry="14" fill="#ffffff" stroke="#e7eef5" stroke-width="1"></rect>' +
+  '<rect x="0" y="0" width="340" height="185" rx="18" ry="18" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2" filter="url(#ula_custom_emp_shadow)"></rect>' +
+  '<rect x="0" y="0" width="340" height="8" rx="18" ry="18" fill="#0a6ed1"></rect>' +
+  '<rect x="14" y="14" width="312" height="157" rx="14" ry="14" fill="#ffffff" stroke="#e7eef5" stroke-width="1"></rect>' +
   '<rect x="18" y="18" width="68" height="68" rx="34" ry="34" fill="#edf4ff"></rect>' +
-  '<rect x="14" y="130" width="90" height="42" rx="12" ry="12" fill="#edf5ff" stroke="#d6e9ff" stroke-width="1.2"></rect>' +
-  '<rect x="115" y="130" width="90" height="42" rx="12" ry="12" fill="#f3f6fa" stroke="#e1e8f0" stroke-width="1.2"></rect>' +
-  '<rect x="216" y="130" width="90" height="42" rx="12" ry="12" fill="#eefbf3" stroke="#d6f2df" stroke-width="1.2"></rect>' +
-  '<rect x="14" y="178" width="292" height="14" rx="7" ry="7" fill="#f8fbff" stroke="#eef3f8" stroke-width="1"></rect>' +
+
+  '<rect x="18" y="122" width="145" height="40" rx="13" ry="13" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1.3"></rect>' +
+  '<circle cx="48" cy="142" r="11" fill="#0a6ed1"></circle>' +
+  '<text style="font-size:12px;font-weight:800;" fill="#ffffff" x="48" y="147" text-anchor="middle">T</text>' +
+  '<text style="font-size:14px;font-weight:800;" fill="#0a6ed1" x="98" y="147" text-anchor="middle">Teams</text>' +
+
+  '<rect x="177" y="122" width="145" height="40" rx="13" ry="13" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1.3"></rect>' +
+  '<rect x="204" y="134" width="20" height="16" rx="4" ry="4" fill="#334e68"></rect>' +
+  '<path d="M206 137 L214 143 L222 137" stroke="#ffffff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+  '<text style="font-size:14px;font-weight:800;" fill="#334e68" x="270" y="147" text-anchor="middle">Outlook</text>' +
   '</g>'
 
 OrgChart.templates.ula_custom_emp.img_0 =
   '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#ula_custom_emp_circle)" xlink:href="{val}" x="18" y="18" width="68" height="68"></image>'
 
 OrgChart.templates.ula_custom_emp.field_0 =
-  '<text data-width="200" data-text-overflow="multiline" style="font-size:18px;font-weight:700;" fill="#102a43" x="98" y="42">{val}</text>'
+  '<text data-width="218" data-text-overflow="multiline" style="font-size:18px;font-weight:700;" fill="#102a43" x="98" y="42">{val}</text>'
 
 OrgChart.templates.ula_custom_emp.field_1 =
-  '<text data-width="200" data-text-overflow="ellipsis" style="font-size:13px;font-weight:600;" fill="#0a6ed1" x="98" y="88">{val}</text>'
+  '<text data-width="218" data-text-overflow="ellipsis" style="font-size:13px;font-weight:600;" fill="#0a6ed1" x="98" y="88">{val}</text>'
 
 OrgChart.templates.ula_custom_emp.field_2 = ''
 
 OrgChart.templates.ula_custom_emp.field_3 =
-  '<text data-width="74" data-text-overflow="ellipsis" style="font-size:10px;font-weight:700;" fill="#245b93" x="59" y="146" text-anchor="middle">{val}</text>'
+  '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+  '<rect x="18" y="122" width="145" height="40" rx="13" ry="13" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+  '</a>'
 
 OrgChart.templates.ula_custom_emp.field_4 =
-  '<text data-width="74" data-text-overflow="ellipsis" style="font-size:10px;font-weight:700;" fill="#52606d" x="160" y="146" text-anchor="middle">{val}</text>'
+  '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+  '<rect x="177" y="122" width="145" height="40" rx="13" ry="13" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+  '</a>'
 
-OrgChart.templates.ula_custom_emp.field_5 =
-  '<text data-width="74" data-text-overflow="ellipsis" style="font-size:10px;font-weight:700;" fill="#1f7a45" x="261" y="146" text-anchor="middle">{val}</text>'
+OrgChart.templates.ula_custom_emp.field_5 = ''
 
 OrgChart.templates.ula_custom_emp.link =
   '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
   '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
 
+
 OrgChart.templates.ula_custom_emp_noskills = Object.assign({}, OrgChart.templates.ula_custom_emp)
-OrgChart.templates.ula_custom_emp_noskills.size = [320, 120]
-
-OrgChart.templates.ula_custom_emp_noskills.node =
-  '<g>' +
-  '<rect x="0" y="0" width="320" height="120" rx="18" ry="18" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2" filter="url(#ula_custom_emp_shadow)"></rect>' +
-  '<rect x="0" y="0" width="320" height="8" rx="18" ry="18" fill="#0a6ed1"></rect>' +
-  '<rect x="14" y="14" width="292" height="92" rx="14" ry="14" fill="#ffffff" stroke="#e7eef5" stroke-width="1"></rect>' +
-  '<rect x="18" y="18" width="68" height="68" rx="34" ry="34" fill="#edf4ff"></rect>' +
-  '</g>'
-
-OrgChart.templates.ula_custom_emp_noskills.img_0 =
-  '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#ula_custom_emp_circle)" xlink:href="{val}" x="18" y="18" width="68" height="68"></image>'
-
-OrgChart.templates.ula_custom_emp_noskills.field_0 =
-  '<text data-width="200" data-text-overflow="multiline" style="font-size:18px;font-weight:700;" fill="#102a43" x="98" y="42">{val}</text>'
-
-OrgChart.templates.ula_custom_emp_noskills.field_1 =
-  '<text data-width="200" data-text-overflow="ellipsis" style="font-size:13px;font-weight:600;" fill="#0a6ed1" x="98" y="66">{val}</text>'
-
-OrgChart.templates.ula_custom_emp_noskills.field_2 = ''
-OrgChart.templates.ula_custom_emp_noskills.field_3 = ''
-OrgChart.templates.ula_custom_emp_noskills.field_4 = ''
-OrgChart.templates.ula_custom_emp_noskills.field_5 = ''
+OrgChart.templates.ula_custom_emp_noskills.size = OrgChart.templates.ula_custom_emp.size
+OrgChart.templates.ula_custom_emp_noskills.defs = OrgChart.templates.ula_custom_emp.defs
+OrgChart.templates.ula_custom_emp_noskills.node = OrgChart.templates.ula_custom_emp.node
+OrgChart.templates.ula_custom_emp_noskills.img_0 = OrgChart.templates.ula_custom_emp.img_0
+OrgChart.templates.ula_custom_emp_noskills.field_0 = OrgChart.templates.ula_custom_emp.field_0
+OrgChart.templates.ula_custom_emp_noskills.field_1 = OrgChart.templates.ula_custom_emp.field_1
+OrgChart.templates.ula_custom_emp_noskills.field_2 = OrgChart.templates.ula_custom_emp.field_2
+OrgChart.templates.ula_custom_emp_noskills.field_3 = OrgChart.templates.ula_custom_emp.field_3
+OrgChart.templates.ula_custom_emp_noskills.field_4 = OrgChart.templates.ula_custom_emp.field_4
+OrgChart.templates.ula_custom_emp_noskills.field_5 = OrgChart.templates.ula_custom_emp.field_5
 OrgChart.templates.ula_custom_emp_noskills.link = OrgChart.templates.ula_custom_emp.link
+
 
 OrgChart.templates.ula_custom_unit = Object.assign({}, OrgChart.templates.ula_custom_emp)
 OrgChart.templates.ula_custom_unit.size = [350, 150]
@@ -96,6 +94,7 @@ OrgChart.templates.ula_custom_unit.link =
   '<path stroke="#bfd0e2" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
   '<path stroke="#7fa7d6" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
 
+
 OrgChart.templates.ula_custom_pos = Object.assign({}, OrgChart.templates.ula_custom_emp)
 OrgChart.templates.ula_custom_pos.size = [320, 120]
 
@@ -121,6 +120,7 @@ OrgChart.templates.ula_custom_pos.field_5 = ''
 OrgChart.templates.ula_custom_pos.link =
   '<path stroke="#d7e3f2" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
   '<path stroke="#9ebae6" stroke-width="2.7" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+
 
 window.HsOrgChartTemplates = window.HsOrgChartTemplates || {}
 
@@ -179,7 +179,17 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
 
     node +=
       '<rect x="' + (xOffset + 18) + '" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
-      '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="28" fill="#edf4ff"></circle>'
+      '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="28" fill="#edf4ff"></circle>' +
+
+      '<rect x="' + (xOffset + 30) + '" y="' + (y + 82) + '" width="162" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+      '<circle cx="' + (xOffset + 58) + '" cy="' + (y + 99) + '" r="8" fill="#0a6ed1"></circle>' +
+      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (xOffset + 58) + '" y="' + (y + 103) + '" text-anchor="middle">T</text>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (xOffset + 112) + '" y="' + (y + 104) + '" text-anchor="middle">Teams</text>' +
+
+      '<rect x="' + (xOffset + 212) + '" y="' + (y + 82) + '" width="162" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+      '<rect x="' + (xOffset + 240) + '" y="' + (y + 92) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+      '<path d="M' + (xOffset + 242) + ' ' + (y + 94) + ' L' + (xOffset + 248) + ' ' + (y + 99) + ' L' + (xOffset + 254) + ' ' + (y + 94) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (xOffset + 312) + '" y="' + (y + 104) + '" text-anchor="middle">Outlook</text>'
   }
 
   node += '</g>'
@@ -204,28 +214,26 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     '<text data-width="238" data-text-overflow="ellipsis" style="font-size:11px;font-weight:600;" fill="#0a6ed1" x="104" y="154">{val}</text>'
 
   OrgChart.templates[templateName].field_8 =
-    '<rect x="30" y="178" width="96" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#d6e9ff" stroke-width="1" opacity="{val}"></rect>'
+    '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+    '<rect x="30" y="178" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '</a>'
 
   OrgChart.templates[templateName].field_9 =
-    '<rect x="138" y="178" width="96" height="34" rx="10" ry="10" fill="#f3f6fa" stroke="#e1e8f0" stroke-width="1" opacity="{val}"></rect>'
-
-  OrgChart.templates[templateName].field_11 =
-    '<rect x="246" y="178" width="96" height="34" rx="10" ry="10" fill="#eefbf3" stroke="#d6f2df" stroke-width="1" opacity="{val}"></rect>'
-
-  OrgChart.templates[templateName].field_13 =
-    '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#245b93" x="78" y="202" text-anchor="middle">{val}</text>'
-
-  OrgChart.templates[templateName].field_14 =
-    '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#52606d" x="186" y="202" text-anchor="middle">{val}</text>'
-
-  OrgChart.templates[templateName].field_15 =
-    '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#1f7a45" x="294" y="202" text-anchor="middle">{val}</text>'
+    '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+    '<rect x="212" y="178" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '</a>'
 
   OrgChart.templates[templateName].field_10 =
-    '<rect class="hs-team-member-click" data-member-id="{val}" x="18" y="96" width="394" height="128" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    '<rect class="hs-team-member-click" data-member-id="{val}" x="18" y="96" width="394" height="78" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+
+  OrgChart.templates[templateName].field_11 = ''
+  OrgChart.templates[templateName].field_12 = ''
+  OrgChart.templates[templateName].field_13 = ''
+  OrgChart.templates[templateName].field_14 = ''
+  OrgChart.templates[templateName].field_15 = ''
 
   for (var index = 1; index <= memberCount - 1; index++) {
-    var base = 20 + (index - 1) * 9
+    var base = 20 + (index - 1) * 7
     var imageIndex = index + 1
     var memberColumnIndex = Math.floor(index / maxRowsPerColumn)
     var memberRowIndex = index % maxRowsPerColumn
@@ -242,25 +250,20 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
       '<text data-width="238" data-text-overflow="ellipsis" style="font-size:11px;font-weight:600;" fill="#0a6ed1" x="' + (memberXOffset + 104) + '" y="' + (rowY + 58) + '">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 2)] =
-      '<rect x="' + (memberXOffset + 30) + '" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#d6e9ff" stroke-width="1" opacity="{val}"></rect>'
+      '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+      '<rect x="' + (memberXOffset + 30) + '" y="' + (rowY + 82) + '" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+      '</a>'
 
     OrgChart.templates[templateName]["field_" + (base + 3)] =
-      '<rect x="' + (memberXOffset + 138) + '" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#f3f6fa" stroke="#e1e8f0" stroke-width="1" opacity="{val}"></rect>'
+      '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+      '<rect x="' + (memberXOffset + 212) + '" y="' + (rowY + 82) + '" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+      '</a>'
 
     OrgChart.templates[templateName]["field_" + (base + 4)] =
-      '<rect x="' + (memberXOffset + 246) + '" y="' + (rowY + 82) + '" width="96" height="34" rx="10" ry="10" fill="#eefbf3" stroke="#d6f2df" stroke-width="1" opacity="{val}"></rect>'
+      '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (memberXOffset + 18) + '" y="' + rowY + '" width="394" height="78" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
 
-    OrgChart.templates[templateName]["field_" + (base + 6)] =
-      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#245b93" x="' + (memberXOffset + 78) + '" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
-
-    OrgChart.templates[templateName]["field_" + (base + 7)] =
-      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#52606d" x="' + (memberXOffset + 186) + '" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
-
-    OrgChart.templates[templateName]["field_" + (base + 8)] =
-      '<text data-width="82" data-text-overflow="ellipsis" style="font-size:9px;font-weight:700;" fill="#1f7a45" x="' + (memberXOffset + 294) + '" y="' + (rowY + 106) + '" text-anchor="middle">{val}</text>'
-
-    OrgChart.templates[templateName]["field_" + (base + 5)] =
-      '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (memberXOffset + 18) + '" y="' + rowY + '" width="394" height="128" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    OrgChart.templates[templateName]["field_" + (base + 5)] = ''
+    OrgChart.templates[templateName]["field_" + (base + 6)] = ''
   }
 
   OrgChart.templates[templateName].link =
@@ -268,8 +271,8 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
 }
 
-OrgChart.templates.ula_custom_empty_team = Object.assign({}, OrgChart.templates.ula)
 
+OrgChart.templates.ula_custom_empty_team = Object.assign({}, OrgChart.templates.ula)
 OrgChart.templates.ula_custom_empty_team.size = [430, 96]
 
 OrgChart.templates.ula_custom_empty_team.node =

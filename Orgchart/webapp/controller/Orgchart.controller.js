@@ -126,7 +126,7 @@ sap.ui.define([
         } else if (item.NodeType === "S") {
           tags = ["pos"]
         } else {
-          tags = skills.length ? ["emp"] : ["emp_noskills"]
+          tags = ["emp"]
         }
 
         return {
@@ -139,10 +139,8 @@ sap.ui.define([
           phone: phone,
           photo_url: photoUrl,
           teams_url: isEmp ? this._buildTeamsUrl(email) : "",
+          outlook_url: isEmp ? this._buildOutlookUrl(email) : "",
           skills: skills,
-          skill_1: skills[0] || "",
-          skill_2: skills[1] || "",
-          skill_3: skills[2] || "",
           tags: tags
         }
       }.bind(this))
@@ -165,7 +163,6 @@ sap.ui.define([
       this._prepareNodeFilter(chartNodes)
       this.initChart(chartNodes)
     },
-
 
     initChart: function (nodes) {
       this._prepareTeamTemplates(nodes)
@@ -208,13 +205,20 @@ sap.ui.define([
       this._registerTeamMemberClick()
 
       this._chart.on("click", function (sender, args) {
+        var nativeEvent = args.event || args.e || window.event
+        var target = nativeEvent && nativeEvent.target
+
+        if (target && target.closest && target.closest(".hs-card-action-link")) {
+          return true
+        }
+
         var node = args.node
 
         if (!node) {
           return false
         }
 
-        if (node.tags && (node.tags.indexOf("emp") !== -1 || node.tags.indexOf("emp_noskills") !== -1)) {
+        if (node.tags && node.tags.indexOf("emp") !== -1) {
           this._chart.editUI.show(node.id)
         }
 
@@ -228,7 +232,7 @@ sap.ui.define([
           return
         }
 
-        if (node.tags.indexOf("emp") === -1 && node.tags.indexOf("emp_noskills") === -1) {
+        if (node.tags.indexOf("emp") === -1) {
           return
         }
 
@@ -280,22 +284,8 @@ sap.ui.define([
 
     onClearNodeFilter: function () {
       var filter = this.byId("nodeFilter")
-      var search = this.byId("employeeSearch")
-      var searchModel = this.getView().getModel("searchModel")
 
-      if (filter) {
-        filter.removeAllSelectedItems()
-      }
-
-      if (search) {
-        search.setValue("")
-      }
-
-      if (searchModel) {
-        searchModel.setProperty("/query", "")
-        searchModel.setProperty("/results", [])
-        searchModel.setProperty("/visible", false)
-      }
+      filter.removeAllSelectedItems()
 
       this._nodeMap = {}
       this._allNodes.forEach(function (node) {
@@ -441,8 +431,7 @@ sap.ui.define([
         var managementMembers = []
 
         rootChildren.forEach(function (child) {
-          var isEmployee = child.tags &&
-            (child.tags.indexOf("emp") !== -1 || child.tags.indexOf("emp_noskills") !== -1)
+          var isEmployee = child.tags && child.tags.indexOf("emp") !== -1
 
           if (child.id && child.id.indexOf("LP") === 0) {
             managementMembers.push(child)
@@ -471,12 +460,8 @@ sap.ui.define([
             managementNode["emp_" + clearIndex + "_name"] = ""
             managementNode["emp_" + clearIndex + "_title"] = ""
             managementNode["emp_" + clearIndex + "_photo"] = ""
-            managementNode["emp_" + clearIndex + "_skill_1"] = ""
-            managementNode["emp_" + clearIndex + "_skill_2"] = ""
-            managementNode["emp_" + clearIndex + "_skill_3"] = ""
-            managementNode["emp_" + clearIndex + "_skill_1_visible"] = "0"
-            managementNode["emp_" + clearIndex + "_skill_2_visible"] = "0"
-            managementNode["emp_" + clearIndex + "_skill_3_visible"] = "0"
+            managementNode["emp_" + clearIndex + "_teams_url"] = ""
+            managementNode["emp_" + clearIndex + "_outlook_url"] = ""
           }
 
           var leader = managementMembers[0]
@@ -485,12 +470,8 @@ sap.ui.define([
           managementNode.leader_name = leader.name || ""
           managementNode.leader_title = leader.title || ""
           managementNode.leader_photo = leader.photo_url || ""
-          managementNode.leader_skill_1 = leader.skill_1 || ""
-          managementNode.leader_skill_2 = leader.skill_2 || ""
-          managementNode.leader_skill_3 = leader.skill_3 || ""
-          managementNode.leader_skill_1_visible = leader.skill_1 ? "1" : "0"
-          managementNode.leader_skill_2_visible = leader.skill_2 ? "1" : "0"
-          managementNode.leader_skill_3_visible = leader.skill_3 ? "1" : "0"
+          managementNode.leader_teams_url = leader.teams_url || ""
+          managementNode.leader_outlook_url = leader.outlook_url || ""
 
           managementMembers.slice(1).forEach(function (employee, index) {
             var number = index + 1
@@ -499,12 +480,8 @@ sap.ui.define([
             managementNode["emp_" + number + "_name"] = employee.name || ""
             managementNode["emp_" + number + "_title"] = employee.title || ""
             managementNode["emp_" + number + "_photo"] = employee.photo_url || ""
-            managementNode["emp_" + number + "_skill_1"] = employee.skill_1 || ""
-            managementNode["emp_" + number + "_skill_2"] = employee.skill_2 || ""
-            managementNode["emp_" + number + "_skill_3"] = employee.skill_3 || ""
-            managementNode["emp_" + number + "_skill_1_visible"] = employee.skill_1 ? "1" : "0"
-            managementNode["emp_" + number + "_skill_2_visible"] = employee.skill_2 ? "1" : "0"
-            managementNode["emp_" + number + "_skill_3_visible"] = employee.skill_3 ? "1" : "0"
+            managementNode["emp_" + number + "_teams_url"] = employee.teams_url || ""
+            managementNode["emp_" + number + "_outlook_url"] = employee.outlook_url || ""
           })
 
           managementMembers.forEach(function (employee) {
@@ -541,8 +518,7 @@ sap.ui.define([
         var directEmployees = []
 
         children.forEach(function (child) {
-          var isEmployee = child.tags &&
-            (child.tags.indexOf("emp") !== -1 || child.tags.indexOf("emp_noskills") !== -1)
+          var isEmployee = child.tags && child.tags.indexOf("emp") !== -1
 
           if (child.id && child.id.indexOf("LP") === 0) {
             leader = child
@@ -568,7 +544,7 @@ sap.ui.define([
 
         var employees = leaderChildren.filter(function (child) {
           return child.tags &&
-            (child.tags.indexOf("emp") !== -1 || child.tags.indexOf("emp_noskills") !== -1) &&
+            child.tags.indexOf("emp") !== -1 &&
             child.id !== leader.id
         })
 
@@ -599,12 +575,8 @@ sap.ui.define([
           teamNode["emp_" + clearIndex + "_name"] = ""
           teamNode["emp_" + clearIndex + "_title"] = ""
           teamNode["emp_" + clearIndex + "_photo"] = ""
-          teamNode["emp_" + clearIndex + "_skill_1"] = ""
-          teamNode["emp_" + clearIndex + "_skill_2"] = ""
-          teamNode["emp_" + clearIndex + "_skill_3"] = ""
-          teamNode["emp_" + clearIndex + "_skill_1_visible"] = "0"
-          teamNode["emp_" + clearIndex + "_skill_2_visible"] = "0"
-          teamNode["emp_" + clearIndex + "_skill_3_visible"] = "0"
+          teamNode["emp_" + clearIndex + "_teams_url"] = ""
+          teamNode["emp_" + clearIndex + "_outlook_url"] = ""
         }
 
         teamNode.member_count = employees.length + 1
@@ -612,12 +584,8 @@ sap.ui.define([
         teamNode.leader_name = leader.name || ""
         teamNode.leader_title = leader.title || ""
         teamNode.leader_photo = leader.photo_url || ""
-        teamNode.leader_skill_1 = leader.skill_1 || ""
-        teamNode.leader_skill_2 = leader.skill_2 || ""
-        teamNode.leader_skill_3 = leader.skill_3 || ""
-        teamNode.leader_skill_1_visible = leader.skill_1 ? "1" : "0"
-        teamNode.leader_skill_2_visible = leader.skill_2 ? "1" : "0"
-        teamNode.leader_skill_3_visible = leader.skill_3 ? "1" : "0"
+        teamNode.leader_teams_url = leader.teams_url || ""
+        teamNode.leader_outlook_url = leader.outlook_url || ""
 
         employees.forEach(function (employee, index) {
           var number = index + 1
@@ -626,12 +594,8 @@ sap.ui.define([
           teamNode["emp_" + number + "_name"] = employee.name || ""
           teamNode["emp_" + number + "_title"] = employee.title || ""
           teamNode["emp_" + number + "_photo"] = employee.photo_url || ""
-          teamNode["emp_" + number + "_skill_1"] = employee.skill_1 || ""
-          teamNode["emp_" + number + "_skill_2"] = employee.skill_2 || ""
-          teamNode["emp_" + number + "_skill_3"] = employee.skill_3 || ""
-          teamNode["emp_" + number + "_skill_1_visible"] = employee.skill_1 ? "1" : "0"
-          teamNode["emp_" + number + "_skill_2_visible"] = employee.skill_2 ? "1" : "0"
-          teamNode["emp_" + number + "_skill_3_visible"] = employee.skill_3 ? "1" : "0"
+          teamNode["emp_" + number + "_teams_url"] = employee.teams_url || ""
+          teamNode["emp_" + number + "_outlook_url"] = employee.outlook_url || ""
         })
 
         teamNode.tags = ["team_" + String(teamNode.member_count)]
@@ -666,36 +630,34 @@ sap.ui.define([
       var binding = {
         field_0: "name",
         field_1: "title",
-        field_3: "skill_1",
-        field_4: "skill_2",
-        field_5: "skill_3",
+        field_2: "",
+        field_3: "teams_url",
+        field_4: "outlook_url",
+        field_5: "",
 
         field_6: "leader_name",
         field_7: "leader_title",
-        field_8: "leader_skill_1_visible",
-        field_9: "leader_skill_2_visible",
+        field_8: "leader_teams_url",
+        field_9: "leader_outlook_url",
         field_10: "leader_id",
-        field_11: "leader_skill_3_visible",
-        field_13: "leader_skill_1",
-        field_14: "leader_skill_2",
-        field_15: "leader_skill_3",
+        field_11: "",
+        field_12: "",
 
         img_0: "photo_url",
         img_1: "leader_photo"
       }
 
       for (var index = 1; index <= 20; index++) {
-        var base = 20 + (index - 1) * 9
+        var base = 20 + (index - 1) * 7
 
         binding["field_" + base] = "emp_" + index + "_name"
         binding["field_" + (base + 1)] = "emp_" + index + "_title"
-        binding["field_" + (base + 2)] = "emp_" + index + "_skill_1_visible"
-        binding["field_" + (base + 3)] = "emp_" + index + "_skill_2_visible"
-        binding["field_" + (base + 4)] = "emp_" + index + "_skill_3_visible"
-        binding["field_" + (base + 5)] = "emp_" + index + "_id"
-        binding["field_" + (base + 6)] = "emp_" + index + "_skill_1"
-        binding["field_" + (base + 7)] = "emp_" + index + "_skill_2"
-        binding["field_" + (base + 8)] = "emp_" + index + "_skill_3"
+        binding["field_" + (base + 2)] = "emp_" + index + "_teams_url"
+        binding["field_" + (base + 3)] = "emp_" + index + "_outlook_url"
+        binding["field_" + (base + 4)] = "emp_" + index + "_id"
+        binding["field_" + (base + 5)] = ""
+        binding["field_" + (base + 6)] = ""
+
         binding["img_" + (index + 1)] = "emp_" + index + "_photo"
       }
 
@@ -746,6 +708,12 @@ sap.ui.define([
       }
 
       chartElement.onclick = function (event) {
+        var linkElement = event.target && event.target.closest ? event.target.closest(".hs-card-action-link") : null
+
+        if (linkElement) {
+          return
+        }
+
         var target = event.target
         var memberElement = target && target.closest ? target.closest(".hs-team-member-click") : null
 
@@ -941,13 +909,21 @@ sap.ui.define([
         )
       }
 
-      if (node.teams_url) {
+      if (node.teams_url || node.outlook_url) {
         var actionsWrap = document.createElement("div")
         actionsWrap.className = "hs-orgchart-actions"
 
-        actionsWrap.appendChild(
-          createActionButton("In Teams öffnen", node.teams_url, "hs-orgchart-action-button-primary")
-        )
+        if (node.teams_url) {
+          actionsWrap.appendChild(
+            createActionButton("In Teams öffnen", node.teams_url, "hs-orgchart-action-button-primary")
+          )
+        }
+
+        if (node.outlook_url) {
+          actionsWrap.appendChild(
+            createActionButton("In Outlook öffnen", node.outlook_url, "hs-orgchart-action-button-secondary")
+          )
+        }
 
         content.appendChild(createInfoCard("Aktionen", actionsWrap))
       }
@@ -1111,5 +1087,12 @@ sap.ui.define([
       return resultId
     },
 
+    _buildOutlookUrl: function (email) {
+      if (!email) {
+        return ""
+      }
+
+      return "mailto:" + email
+    },
   })
 })
