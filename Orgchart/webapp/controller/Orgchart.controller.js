@@ -1,7 +1,15 @@
 sap.ui.define([
   "sap/ui/core/mvc/Controller",
-  "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+  "sap/ui/model/json/JSONModel",
+  "sap/m/Dialog",
+  "sap/m/Tree",
+  "sap/m/StandardTreeItem",
+  "sap/m/Button",
+  "sap/m/VBox",
+  "sap/m/Toolbar",
+  "sap/m/ToolbarSpacer",
+  "sap/m/SearchField"
+], function (Controller, JSONModel, Dialog, Tree, StandardTreeItem, Button, VBox, Toolbar, ToolbarSpacer, SearchField) {
   "use strict"
 
   return Controller.extend("hs.com.orgchart.controller.Orgchart", {
@@ -17,11 +25,19 @@ sap.ui.define([
       this._skillsLoaded = false
       this._allNodes = []
       this.onLoad()
+
       this.getView().setModel(new JSONModel({
         query: "",
         results: [],
         visible: false
       }), "searchModel")
+
+      this.getView().setModel(new JSONModel({
+        nodes: [],
+        selectedIds: [],
+        selectionText: ""
+      }), "treeFilterModel")
+
     },
 
     onLoad: function () {
@@ -151,7 +167,10 @@ sap.ui.define([
         this._profileNodeMap[node.id] = node
       }.bind(this))
 
+      this._prepareNodeFilter(originalNodes)
+
       var chartNodes = this._insertTeamContainers(originalNodes)
+      chartNodes = this._insertTopAnchors(chartNodes)
 
       this._nodeMap = {}
 
@@ -160,7 +179,6 @@ sap.ui.define([
       }.bind(this))
 
       this._allNodes = chartNodes
-      this._prepareNodeFilter(chartNodes)
       this.initChart(chartNodes)
     },
 
@@ -179,7 +197,7 @@ sap.ui.define([
         nodeMouseClick: OrgChart.action.none,
         scaleInitial: OrgChart.match.boundary,
         padding: 80,
-        levelSeparation: 120,
+        levelSeparation: 80,
         siblingSeparation: 180,
         subtreeSeparation: 300,
         nodeBinding: nodeBinding,
@@ -242,59 +260,341 @@ sap.ui.define([
       }.bind(this))
     },
 
-    _prepareNodeFilter: function (nodes) {
-      var filterNodes = nodes
-        .filter(function (node) {
-          return node.node_type === "O"
+    _insertTopAnchors: function (nodes) {
+      var result = []
+
+      nodes.forEach(function (node) {
+        var needsAnchor = node.member_count && node.pid
+
+        if (!needsAnchor) {
+          result.push(node)
+          return
+        }
+
+        var anchorId = "ANCHOR_" + node.id
+
+        result.push({
+          id: anchorId,
+          pid: node.pid,
+          node_type: "A",
+          name: "",
+          title: "",
+          photo_url: "",
+          tags: ["anchor"]
         })
-        .map(function (node) {
-          return {
+
+        node.pid = anchorId
+        result.push(node)
+      })
+
+      return result
+    },
+
+    _prepareNodeFilter: function (nodes) {
+      var allNodeMap = {}
+      var orgNodeMap = {}
+      var childrenMap = {}
+      var rootNodes = []
+      var flatNodes = []
+
+      nodes.forEach(function (node) {
+        if (!node.id) {
+          return
+        }
+
+        allNodeMap[node.id] = node
+
+        if (node.node_type === "O" && node.id !== "ROOT_MANAGEMENT") {
+          orgNodeMap[node.id] = {
             id: node.id,
-            text: node.name || node.id
+            text: node.name || node.id,
+            pid: node.pid || "",
+            children: []
+          }
+        }
+      })
+
+      function findNearestOrgParentId(node) {
+        var parentId = node.pid
+        var safetyCounter = 0
+
+        while (parentId && safetyCounter < 50) {
+          if (orgNodeMap[parentId]) {
+            return parentId
+          }
+
+          var parentNode = allNodeMap[parentId]
+
+          if (!parentNode) {
+            return ""
+          }
+
+          parentId = parentNode.pid
+          safetyCounter++
+        }
+
+        return ""
+      }
+
+      Object.keys(orgNodeMap).forEach(function (nodeId) {
+        var orgNode = orgNodeMap[nodeId]
+        var sourceNode = allNodeMap[nodeId]
+        var nearestOrgParentId = findNearestOrgParentId(sourceNode)
+
+        if (nearestOrgParentId && orgNodeMap[nearestOrgParentId]) {
+          if (!childrenMap[nearestOrgParentId]) {
+            childrenMap[nearestOrgParentId] = []
+          }
+
+          childrenMap[nearestOrgParentId].push(orgNode)
+        } else {
+          rootNodes.push(orgNode)
+        }
+      })
+
+      function sortByText(firstNode, secondNode) {
+        var firstText = String(firstNode.text || "").toLowerCase()
+        var secondText = String(secondNode.text || "").toLowerCase()
+
+        if (firstText < secondText) {
+          return -1
+        }
+
+        if (firstText > secondText) {
+          return 1
+        }
+
+        return 0
+      }
+
+      function buildTree(node) {
+        var children = childrenMap[node.id] || []
+
+        children.sort(sortByText)
+
+        children.forEach(function (child) {
+          node.children.push(child)
+          buildTree(child)
+        })
+      }
+
+      rootNodes.sort(sortByText)
+
+      rootNodes.forEach(function (node) {
+        buildTree(node)
+      })
+
+      this.getView().setModel(new JSONModel({
+        nodes: rootNodes,
+        selectedIds: [],
+        selectionText: ""
+      }), "treeFilterModel")
+    },
+
+    onOpenNodeFilterDialog: function () {
+      if (!this._nodeFilterDialog) {
+        var tree = new Tree(this.createId("nodeFilterTree"), {
+          mode: "MultiSelect",
+          includeItemInSelection: true,
+          items: {
+            path: "treeFilterModel>/nodes",
+            parameters: {
+              arrayNames: ["children"]
+            },
+            template: new StandardTreeItem({
+              title: "{treeFilterModel>text}"
+            })
           }
         })
 
-      var filterModel = new JSONModel({
-        nodes: filterNodes
-      })
+        var searchField = new SearchField(this.createId("nodeFilterTreeSearch"), {
+          width: "100%",
+          placeholder: "Organisationseinheit suchen",
+          liveChange: function (event) {
+            this.onNodeTreeSearch(event)
+          }.bind(this)
+        })
 
-      this.getView().setModel(filterModel, "filterModel")
+        this._nodeFilterDialog = new Dialog(this.createId("nodeFilterDialog"), {
+          title: "Organisationseinheiten auswählen",
+          contentWidth: "560px",
+          contentHeight: "620px",
+          resizable: true,
+          draggable: true,
+          content: [
+            new VBox({
+              width: "100%",
+              items: [
+                searchField,
+                tree
+              ]
+            })
+          ],
+          buttons: [
+            new Button({
+              text: "Übernehmen",
+              type: "Emphasized",
+              press: function () {
+                this.onApplyNodeTreeFilter()
+              }.bind(this)
+            }),
+            new Button({
+              text: "Abbrechen",
+              press: function () {
+                this._nodeFilterDialog.close()
+              }.bind(this)
+            })
+          ]
+        })
+
+        this.getView().addDependent(this._nodeFilterDialog)
+      }
+
+      this._syncNodeTreeSelection()
+      this._nodeFilterDialog.open()
     },
 
-    onNodeFilterChange: function (event) {
-      var selectedItems = event.getSource().getSelectedItems()
-      var selectedIds = selectedItems.map(function (item) {
-        return item.getKey()
+    onNodeTreeSearch: function (event) {
+      var query = String(event.getParameter("newValue") || "").trim()
+      var tree = this.byId("nodeFilterTree")
+
+      if (!tree) {
+        return
+      }
+
+      if (query) {
+        tree.expandToLevel(10)
+      } else {
+        tree.expandToLevel(1)
+      }
+    },
+
+    _syncNodeTreeSelection: function () {
+      var tree = this.byId("nodeFilterTree")
+      var treeModel = this.getView().getModel("treeFilterModel")
+      var selectedIds = treeModel ? treeModel.getProperty("/selectedIds") || [] : []
+
+      if (!tree) {
+        return
+      }
+
+      tree.removeSelections(true)
+
+      tree.getItems().forEach(function (item) {
+        var context = item.getBindingContext("treeFilterModel")
+        var object = context ? context.getObject() : null
+
+        if (object && selectedIds.indexOf(object.id) !== -1) {
+          tree.setSelectedItem(item, true)
+        }
+      })
+    },
+
+    onApplyNodeTreeFilter: function () {
+      var tree = this.byId("nodeFilterTree")
+      var treeModel = this.getView().getModel("treeFilterModel")
+      var selectedItems = tree ? tree.getSelectedItems() : []
+      var selectedIds = []
+      var selectedNames = []
+
+      selectedItems.forEach(function (item) {
+        var context = item.getBindingContext("treeFilterModel")
+        var object = context ? context.getObject() : null
+
+        if (!object || !object.id) {
+          return
+        }
+
+        selectedIds.push(object.id)
+        selectedNames.push(object.text)
       })
 
-      if (!selectedIds.length) {
-        this._chart.load(this._allNodes)
+      if (treeModel) {
+        treeModel.setProperty("/selectedIds", selectedIds)
+
+        if (!selectedNames.length) {
+          treeModel.setProperty("/selectionText", "")
+        } else if (selectedNames.length === 1) {
+          treeModel.setProperty("/selectionText", selectedNames[0])
+        } else {
+          treeModel.setProperty("/selectionText", selectedNames.length + " Organisationseinheiten ausgewählt")
+        }
+      }
+
+      this._applyNodeFilterByIds(selectedIds)
+
+      if (this._nodeFilterDialog) {
+        this._nodeFilterDialog.close()
+      }
+    },
+
+    _applyNodeFilterByIds: function (selectedIds) {
+      if (!selectedIds || !selectedIds.length) {
+        this._nodeMap = {}
+
+        this._allNodes.forEach(function (node) {
+          this._nodeMap[node.id] = node
+        }.bind(this))
+
+        if (this._chart) {
+          this._chart.load(this._allNodes)
+        }
+
         return
       }
 
       var filteredNodes = this._getFilteredNodesWithParentsAndChildren(selectedIds)
 
       this._nodeMap = {}
+
       filteredNodes.forEach(function (node) {
         this._nodeMap[node.id] = node
       }.bind(this))
 
-      this._chart.load(filteredNodes)
+      if (this._chart) {
+        this._chart.load(filteredNodes)
+      }
+    },
+
+    onApplyFilters: function () {
+      var treeModel = this.getView().getModel("treeFilterModel")
+      var selectedIds = treeModel ? treeModel.getProperty("/selectedIds") || [] : []
+
+      this._applyNodeFilterByIds(selectedIds)
     },
 
     onClearNodeFilter: function () {
       var filter = this.byId("nodeFilter")
+      var searchModel = this.getView().getModel("searchModel")
+      var treeModel = this.getView().getModel("treeFilterModel")
+      var employeeSearch = this.byId("employeeSearch")
+      var tree = this.byId("nodeFilterTree")
 
-      filter.removeAllSelectedItems()
-
-      this._nodeMap = {}
-      this._allNodes.forEach(function (node) {
-        this._nodeMap[node.id] = node
-      }.bind(this))
-
-      if (this._chart) {
-        this._chart.load(this._allNodes)
+      if (filter) {
+        filter.removeAllSelectedItems()
+        filter.setSelectedKeys([])
       }
+
+      if (tree) {
+        tree.removeSelections(true)
+      }
+
+      if (treeModel) {
+        treeModel.setProperty("/selectedIds", [])
+        treeModel.setProperty("/selectionText", "")
+      }
+
+      if (searchModel) {
+        searchModel.setProperty("/query", "")
+        searchModel.setProperty("/results", [])
+        searchModel.setProperty("/visible", false)
+      }
+
+      if (employeeSearch) {
+        employeeSearch.setValue("")
+      }
+
+      this._applyNodeFilterByIds([])
     },
 
     _getFilteredNodesWithParentsAndChildren: function (selectedIds) {
@@ -426,19 +726,71 @@ sap.ui.define([
         }
       })
 
+      function isEmployeeNode(node) {
+        return node.tags && node.tags.indexOf("emp") !== -1
+      }
+
+      function isLeaderNode(node) {
+        return node && node.id && node.id.indexOf("LP") === 0
+      }
+
+      function findDirectLeader(orgNode) {
+        var children = childrenMap[orgNode.id] || []
+        var leader = null
+
+        children.some(function (child) {
+          if (isLeaderNode(child)) {
+            leader = child
+            return true
+          }
+
+          return false
+        })
+
+        if (!leader && orgNode.leader_id && nodeMap[orgNode.leader_id]) {
+          leader = nodeMap[orgNode.leader_id]
+        }
+
+        return leader
+      }
+
+      function findInheritedLeader(orgNode) {
+        var parentId = orgNode.pid
+        var safetyCounter = 0
+
+        while (parentId && safetyCounter < 50) {
+          var parentNode = nodeMap[parentId]
+
+          if (!parentNode) {
+            return null
+          }
+
+          if (parentNode.node_type === "O") {
+            var leader = findDirectLeader(parentNode)
+
+            if (leader) {
+              return leader
+            }
+          }
+
+          parentId = parentNode.pid
+          safetyCounter++
+        }
+
+        return null
+      }
+
       if (rootId) {
         var rootChildren = childrenMap[rootId] || []
         var managementMembers = []
 
         rootChildren.forEach(function (child) {
-          var isEmployee = child.tags && child.tags.indexOf("emp") !== -1
-
-          if (child.id && child.id.indexOf("LP") === 0) {
+          if (isLeaderNode(child)) {
             managementMembers.push(child)
             return
           }
 
-          if (isEmployee) {
+          if (isEmployeeNode(child)) {
             managementMembers.push(child)
           }
         })
@@ -515,24 +867,23 @@ sap.ui.define([
 
         var children = childrenMap[teamNode.id] || []
         var leader = null
+        var inheritedLeader = null
         var directEmployees = []
 
         children.forEach(function (child) {
-          var isEmployee = child.tags && child.tags.indexOf("emp") !== -1
-
-          if (child.id && child.id.indexOf("LP") === 0) {
+          if (isLeaderNode(child)) {
             leader = child
             return
           }
 
-          if (isEmployee) {
+          if (isEmployeeNode(child)) {
             directEmployees.push(child)
           }
         })
 
-        if (!leader && directEmployees.length === 1) {
-          leader = directEmployees[0]
-          directEmployees = []
+        if (!leader) {
+          inheritedLeader = findInheritedLeader(teamNode)
+          leader = inheritedLeader
         }
 
         if (!leader) {
@@ -540,13 +891,23 @@ sap.ui.define([
           return
         }
 
-        var leaderChildren = childrenMap[leader.id] || []
+        var employees = []
 
-        var employees = leaderChildren.filter(function (child) {
-          return child.tags &&
-            child.tags.indexOf("emp") !== -1 &&
-            child.id !== leader.id
-        })
+        if (!inheritedLeader) {
+          var leaderChildren = childrenMap[leader.id] || []
+
+          employees = leaderChildren.filter(function (child) {
+            return isEmployeeNode(child) && child.id !== leader.id
+          })
+
+          leaderChildren.forEach(function (child) {
+            if (child.node_type === "O") {
+              child.pid = teamNode.id
+            }
+          })
+
+          hiddenIds[leader.id] = true
+        }
 
         directEmployees.forEach(function (employee) {
           var exists = employees.some(function (item) {
@@ -557,14 +918,6 @@ sap.ui.define([
             employees.push(employee)
           }
         })
-
-        leaderChildren.forEach(function (child) {
-          if (child.node_type === "O") {
-            child.pid = teamNode.id
-          }
-        })
-
-        hiddenIds[leader.id] = true
 
         employees.forEach(function (employee) {
           hiddenIds[employee.id] = true
@@ -670,7 +1023,8 @@ sap.ui.define([
         pos: { template: "ula_custom_pos" },
         emp: { template: "ula_custom_emp" },
         emp_noskills: { template: "ula_custom_emp_noskills" },
-        empty_team: { template: "ula_custom_empty_team" }
+        empty_team: { template: "ula_custom_empty_team" },
+        anchor: { template: "ula_custom_anchor" }
       }
 
       nodes.forEach(function (node) {

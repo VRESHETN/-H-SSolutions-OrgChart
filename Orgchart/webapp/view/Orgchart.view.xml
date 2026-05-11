@@ -21,9 +21,11 @@
                     <HBox id="_IDGenHBox1" alignItems="End">
                         <VBox id="_IDGenVBox">
                             <Label id="_IDGenLabel" text="Organisationseinheit"/>
-                            <MultiComboBox id="nodeFilter" width="420px" placeholder="Knoten auswählen" selectionFinish="onNodeFilterChange" items="{filterModel>/nodes}">
-                                <core:Item id="_IDGenItem" key="{filterModel>id}" text="{filterModel>text}" />
-                            </MultiComboBox>
+                            <HBox id="nodeFilterBox" width="420px" alignItems="Center">
+                                <Input id="nodeFilterDisplay" width="365px" editable="false" placeholder="Knoten auswählen" value="{treeFilterModel>/selectionText}" />
+
+                                <Button id="nodeFilterOpenButton" icon="sap-icon://value-help" press=".onOpenNodeFilterDialog" class="sapUiTinyMarginBegin" />
+                            </HBox>
                         </VBox>
 
                         <VBox id="_IDGenVBox1" class="sapUiSmallMarginBegin">
