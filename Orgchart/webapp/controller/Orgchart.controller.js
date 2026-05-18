@@ -24,6 +24,8 @@ sap.ui.define([
       this._detailsLoaded = false
       this._skillsLoaded = false
       this._allNodes = []
+      this._visibleNodeMap = {}
+      this._areaCardByHiddenId = {}
       this.onLoad()
 
       this.getView().setModel(new JSONModel({
@@ -168,9 +170,10 @@ sap.ui.define([
       }.bind(this))
 
       this._prepareNodeFilter(originalNodes)
-
+      this._visibleNodeMap = {}
       var chartNodes = this._insertTeamContainers(originalNodes)
-      chartNodes = this._insertTopAnchors(chartNodes)
+      chartNodes = this._insertAreaCardContainers(chartNodes)
+
 
       this._nodeMap = {}
 
@@ -182,8 +185,9 @@ sap.ui.define([
       this.initChart(chartNodes)
     },
 
-    initChart: function (nodes) {
+    initChart: function (nodes, scaleInitial) {
       this._prepareTeamTemplates(nodes)
+      this._prepareAreaCardTemplates(nodes)
 
       var nodeBinding = this._createNodeBinding()
       var chartTags = this._createChartTags(nodes)
@@ -195,7 +199,7 @@ sap.ui.define([
         enableSearch: false,
         mouseScrool: OrgChart.action.zoom,
         nodeMouseClick: OrgChart.action.none,
-        scaleInitial: OrgChart.match.boundary,
+        scaleInitial: scaleInitial || OrgChart.match.boundary,
         padding: 80,
         levelSeparation: 80,
         siblingSeparation: 180,
@@ -227,7 +231,7 @@ sap.ui.define([
         var target = nativeEvent && nativeEvent.target
 
         if (target && target.closest && target.closest(".hs-card-action-link")) {
-          return true
+          return false
         }
 
         var node = args.node
@@ -260,42 +264,11 @@ sap.ui.define([
       }.bind(this))
     },
 
-    _insertTopAnchors: function (nodes) {
-      var result = []
-
-      nodes.forEach(function (node) {
-        var needsAnchor = node.member_count && node.pid
-
-        if (!needsAnchor) {
-          result.push(node)
-          return
-        }
-
-        var anchorId = "ANCHOR_" + node.id
-
-        result.push({
-          id: anchorId,
-          pid: node.pid,
-          node_type: "A",
-          name: "",
-          title: "",
-          photo_url: "",
-          tags: ["anchor"]
-        })
-
-        node.pid = anchorId
-        result.push(node)
-      })
-
-      return result
-    },
-
     _prepareNodeFilter: function (nodes) {
       var allNodeMap = {}
       var orgNodeMap = {}
       var childrenMap = {}
       var rootNodes = []
-      var flatNodes = []
 
       nodes.forEach(function (node) {
         if (!node.id) {
@@ -528,6 +501,22 @@ sap.ui.define([
       }
     },
 
+    _recreateChart: function (nodes, scaleInitial) {
+      var treeElement = document.getElementById("tree")
+
+      if (!treeElement) {
+        return
+      }
+
+      if (this._chart && this._chart.destroy) {
+        this._chart.destroy()
+      }
+
+      treeElement.innerHTML = ""
+
+      this.initChart(nodes, scaleInitial)
+    },
+
     _applyNodeFilterByIds: function (selectedIds) {
       if (!selectedIds || !selectedIds.length) {
         this._nodeMap = {}
@@ -536,14 +525,13 @@ sap.ui.define([
           this._nodeMap[node.id] = node
         }.bind(this))
 
-        if (this._chart) {
-          this._chart.load(this._allNodes)
-        }
+        this._prepareAreaCardTemplates(this._allNodes)
+        this._recreateChart(this._allNodes, OrgChart.match.boundary)
 
         return
       }
 
-      var filteredNodes = this._getFilteredNodesWithParentsAndChildren(selectedIds)
+      var filteredNodes = this._buildFocusedFilterNodes(selectedIds)
 
       this._nodeMap = {}
 
@@ -551,9 +539,8 @@ sap.ui.define([
         this._nodeMap[node.id] = node
       }.bind(this))
 
-      if (this._chart) {
-        this._chart.load(filteredNodes)
-      }
+      this._prepareAreaCardTemplates(filteredNodes)
+      this._recreateChart(filteredNodes, 0.65)
     },
 
     onApplyFilters: function () {
@@ -564,16 +551,16 @@ sap.ui.define([
     },
 
     onClearNodeFilter: function () {
-      var filter = this.byId("nodeFilter")
+      // var filter = this.byId("nodeFilter")
       var searchModel = this.getView().getModel("searchModel")
       var treeModel = this.getView().getModel("treeFilterModel")
       var employeeSearch = this.byId("employeeSearch")
       var tree = this.byId("nodeFilterTree")
 
-      if (filter) {
-        filter.removeAllSelectedItems()
-        filter.setSelectedKeys([])
-      }
+      // if (filter) {
+      //   filter.removeAllSelectedItems()
+      //   filter.setSelectedKeys([])
+      // }
 
       if (tree) {
         tree.removeSelections(true)
@@ -597,46 +584,316 @@ sap.ui.define([
       this._applyNodeFilterByIds([])
     },
 
-    _getFilteredNodesWithParentsAndChildren: function (selectedIds) {
-      var resultMap = {}
+    _buildFocusedFilterNodes: function (selectedIds) {
       var nodeMap = {}
-      var childrenMap = {}
+      var resultMap = {}
+      var areaGroups = {}
+      var normalSelectedIds = []
 
       this._allNodes.forEach(function (node) {
         nodeMap[node.id] = node
+      })
 
-        if (node.pid) {
+      selectedIds.forEach(function (selectedId) {
+        var areaId = this._areaCardByHiddenId[selectedId]
+
+        if (areaId && nodeMap[areaId]) {
+          if (!areaGroups[areaId]) {
+            areaGroups[areaId] = []
+          }
+
+          if (areaGroups[areaId].indexOf(selectedId) === -1) {
+            areaGroups[areaId].push(selectedId)
+          }
+
+          return
+        }
+
+        if (nodeMap[selectedId] && normalSelectedIds.indexOf(selectedId) === -1) {
+          normalSelectedIds.push(selectedId)
+        }
+      }.bind(this))
+
+      Object.keys(areaGroups).forEach(function (areaId) {
+        var areaNode = nodeMap[areaId]
+
+        if (!areaNode) {
+          return
+        }
+
+        var focusedAreaNode = this._buildFocusedAreaNodeForSelectedIds(areaGroups[areaId], areaNode)
+
+        focusedAreaNode.pid = ""
+        resultMap[focusedAreaNode.id] = focusedAreaNode
+      }.bind(this))
+
+      if (normalSelectedIds.length) {
+        var childrenMap = {}
+
+        this._allNodes.forEach(function (node) {
+          if (!node.pid) {
+            return
+          }
+
           if (!childrenMap[node.pid]) {
             childrenMap[node.pid] = []
           }
 
           childrenMap[node.pid].push(node)
+        })
+
+        function addChildren(node, isRoot) {
+          var clonedNode = Object.assign({}, node)
+
+          if (isRoot) {
+            clonedNode.pid = ""
+          }
+
+          resultMap[node.id] = clonedNode
+
+            ; (childrenMap[node.id] || []).forEach(function (child) {
+              addChildren(child, false)
+            })
         }
-      })
 
-      function addChildren(node) {
-        resultMap[node.id] = node
+        normalSelectedIds.forEach(function (selectedId) {
+          var selectedNode = nodeMap[selectedId]
 
-        var children = childrenMap[node.id] || []
+          if (!selectedNode) {
+            return
+          }
 
-        children.forEach(function (child) {
-          addChildren(child)
+          addChildren(selectedNode, true)
         })
       }
 
-      selectedIds.forEach(function (selectedId) {
-        var selectedNode = nodeMap[selectedId]
+      return Object.keys(resultMap).map(function (nodeId) {
+        return resultMap[nodeId]
+      })
+    },
 
-        if (!selectedNode) {
+    _buildFocusedAreaNodeForSelectedIds: function (selectedIds, areaNode) {
+      var clone = Object.assign({}, areaNode)
+      var layout = JSON.parse(areaNode.area_layout_json || '{"roots":[],"cards":[]}')
+      var slotMap = JSON.parse(areaNode.area_slot_map_json || '{}')
+      var areaRootSelected = false
+      var selectedTopSlots = {}
+      var selectedChildSlotsByParent = {}
+      var hasConcreteSelection = false
+      var keepSlots = {}
+      var newRoots = []
+
+      selectedIds.forEach(function (selectedId) {
+        var slotInfo = slotMap[selectedId]
+
+        if (!slotInfo) {
           return
         }
 
-        addChildren(selectedNode)
+        if (slotInfo.areaRoot) {
+          areaRootSelected = true
+          return
+        }
+
+        hasConcreteSelection = true
+
+        if (!slotInfo.parentSlot) {
+          selectedTopSlots[slotInfo.slot] = true
+          return
+        }
+
+        if (!selectedChildSlotsByParent[slotInfo.parentSlot]) {
+          selectedChildSlotsByParent[slotInfo.parentSlot] = {}
+        }
+
+        selectedChildSlotsByParent[slotInfo.parentSlot][slotInfo.slot] = true
       })
 
-      return this._allNodes.filter(function (node) {
-        return !!resultMap[node.id]
+      layout.roots.forEach(function (root) {
+        var rootIsSelected = !!selectedTopSlots[root.slot]
+        var selectedChildren = selectedChildSlotsByParent[root.slot]
+        var childrenToKeep = []
+
+        if (areaRootSelected && !hasConcreteSelection) {
+          keepSlots[root.slot] = true
+
+            ; (root.children || []).forEach(function (childSlot) {
+              keepSlots[childSlot] = true
+              childrenToKeep.push(childSlot)
+            })
+
+          newRoots.push({
+            slot: root.slot,
+            children: childrenToKeep
+          })
+
+          return
+        }
+
+        if (areaRootSelected && hasConcreteSelection) {
+          if (rootIsSelected || selectedChildren) {
+            keepSlots[root.slot] = true
+
+            if (rootIsSelected && !selectedChildren) {
+              ; (root.children || []).forEach(function (childSlot) {
+                keepSlots[childSlot] = true
+                childrenToKeep.push(childSlot)
+              })
+            }
+
+            if (selectedChildren) {
+              ; (root.children || []).forEach(function (childSlot) {
+                if (!selectedChildren[childSlot]) {
+                  return
+                }
+
+                keepSlots[childSlot] = true
+                childrenToKeep.push(childSlot)
+              })
+            }
+
+            newRoots.push({
+              slot: root.slot,
+              children: childrenToKeep
+            })
+          }
+
+          return
+        }
+
+        if (rootIsSelected) {
+          keepSlots[root.slot] = true
+
+          if (selectedChildren) {
+            ; (root.children || []).forEach(function (childSlot) {
+              if (!selectedChildren[childSlot]) {
+                return
+              }
+
+              keepSlots[childSlot] = true
+              childrenToKeep.push(childSlot)
+            })
+          } else {
+            ; (root.children || []).forEach(function (childSlot) {
+              keepSlots[childSlot] = true
+              childrenToKeep.push(childSlot)
+            })
+          }
+
+          newRoots.push({
+            slot: root.slot,
+            children: childrenToKeep
+          })
+
+          return
+        }
+
+        if (selectedChildren) {
+          ; (root.children || []).forEach(function (childSlot) {
+            if (!selectedChildren[childSlot]) {
+              return
+            }
+
+            keepSlots[childSlot] = true
+
+            newRoots.push({
+              slot: childSlot,
+              children: []
+            })
+          })
+        }
       })
+
+      if (!newRoots.length) {
+        clone.pid = ""
+        return clone
+      }
+
+      layout.roots = newRoots
+      layout.cards = (layout.cards || []).filter(function (card) {
+        return !!keepSlots[card.slot]
+      })
+
+      layout.hideOuterFrame = true
+
+      if (areaRootSelected) {
+        layout.hideAreaTitle = false
+        layout.hideHeaderLeader = false
+        layout.hideRootConnector = false
+      } else {
+        layout.hideAreaTitle = true
+        layout.hideHeaderLeader = true
+        layout.hideRootConnector = true
+
+        clone.leader_id = ""
+        clone.leader_name = ""
+        clone.leader_title = ""
+        clone.leader_photo = ""
+        clone.leader_teams_url = ""
+        clone.leader_outlook_url = ""
+      }
+
+      clone.area_layout_json = JSON.stringify(layout)
+      clone.pid = ""
+
+      var cardWidth = 470
+      var cardGap = 52
+      var subtreeGap = 64
+      var outerPadding = 52
+      var areaHeaderHeight = areaRootSelected ? 280 : 24
+      var cardHeaderHeight = 82
+      var leaderHeight = 142
+      var employeeHeight = 126
+      var cardBottomPadding = 24
+      var rowGap = 70
+      var cardMetaMap = {}
+
+      layout.cards.forEach(function (card) {
+        cardMetaMap[card.slot] = card
+      })
+
+      function getCardHeight(slot) {
+        var card = cardMetaMap[slot] || { employeeCount: 0 }
+        return cardHeaderHeight + (card.hideLeader ? 0 : leaderHeight) + (card.employeeCount || 0) * employeeHeight + cardBottomPadding
+      }
+
+      var topRowMaxHeight = 0
+      var bottomRowMaxHeight = 0
+      var hasBottomRow = false
+      var contentWidth = 0
+
+      layout.roots.forEach(function (root, index) {
+        var topHeight = getCardHeight(root.slot)
+
+        if (topHeight > topRowMaxHeight) {
+          topRowMaxHeight = topHeight
+        }
+
+        var childCount = (root.children || []).length
+        var childWidth = childCount ? childCount * cardWidth + (childCount - 1) * cardGap : 0
+        var subtreeWidth = Math.max(cardWidth, childWidth)
+
+        if (index > 0) {
+          contentWidth += subtreeGap
+        }
+
+        contentWidth += subtreeWidth
+
+          ; (root.children || []).forEach(function (childSlot) {
+            hasBottomRow = true
+
+            var childHeight = getCardHeight(childSlot)
+
+            if (childHeight > bottomRowMaxHeight) {
+              bottomRowMaxHeight = childHeight
+            }
+          })
+      })
+
+      clone.area_width = Math.max(520, outerPadding * 2 + contentWidth)
+      clone.area_height = areaHeaderHeight + topRowMaxHeight + (hasBottomRow ? rowGap + bottomRowMaxHeight : 0) + outerPadding
+
+      return clone
     },
 
     _buildTeamsUrl: function (email) {
@@ -840,12 +1097,6 @@ sap.ui.define([
             hiddenIds[employee.id] = true
           })
 
-          nodes.forEach(function (node) {
-            if (node.node_type === "O" && node.pid === rootId) {
-              node.pid = managementNode.id
-            }
-          })
-
           nodes.push(managementNode)
           nodeMap[managementNode.id] = managementNode
         }
@@ -857,7 +1108,7 @@ sap.ui.define([
         }
 
         if (rootIds[teamNode.id]) {
-          teamNode.tags = ["unit"]
+          teamNode.tags = ["root_unit"]
           return
         }
 
@@ -967,6 +1218,340 @@ sap.ui.define([
       })
     },
 
+    _insertAreaCardContainers: function (nodes) {
+      var that = this
+      var nodeMap = {}
+      var childrenMap = {}
+      var hiddenIds = {}
+      var result = []
+      var rootId = ""
+      var managementNodeId = ""
+      var areaIndex = 1
+
+      this._areaCardByHiddenId = {}
+
+      nodes.forEach(function (node) {
+        if (!node || !node.id) {
+          return
+        }
+
+        nodeMap[node.id] = node
+
+        if (node.id === "ROOT_MANAGEMENT") {
+          managementNodeId = node.id
+        }
+
+        if (node.pid) {
+          if (!childrenMap[node.pid]) {
+            childrenMap[node.pid] = []
+          }
+
+          childrenMap[node.pid].push(node)
+        }
+      })
+
+      nodes.forEach(function (node) {
+        if (node.node_type === "O" && (!node.pid || !nodeMap[node.pid])) {
+          rootId = node.id
+        }
+      })
+
+      if (!rootId) {
+        return nodes
+      }
+
+      var sourceParentId = rootId
+      var targetParentId = managementNodeId || rootId
+      var areaRootNodes = []
+
+      var rootOrgChildren = (childrenMap[sourceParentId] || []).filter(function (node) {
+        return node && node.id && node.node_type === "O" && node.id !== "ROOT_MANAGEMENT"
+      })
+
+      rootOrgChildren.forEach(function (rootChild) {
+        areaRootNodes.push(rootChild)
+      })
+
+      function getDirectOrgChildren(nodeId) {
+        return (childrenMap[nodeId] || []).filter(function (child) {
+          return child && child.node_type === "O" && child.id !== "ROOT_MANAGEMENT"
+        })
+      }
+
+      function getEmployeeCount(card) {
+        var count = 0
+
+        for (var index = 1; index <= 8; index++) {
+          if (card["emp_" + index + "_id"] || card["emp_" + index + "_name"]) {
+            count++
+          }
+        }
+
+        return count
+      }
+
+      function fillAreaCardData(target, slot, card) {
+        var prefix = "area_card_" + slot + "_"
+
+        target[prefix + "name"] = card.name || ""
+        target[prefix + "leader_id"] = card.leader_id || ""
+        target[prefix + "leader_name"] = card.leader_name || ""
+        target[prefix + "leader_title"] = card.leader_title || ""
+        target[prefix + "leader_photo"] = card.leader_photo || ""
+        target[prefix + "leader_teams_url"] = card.leader_teams_url || ""
+        target[prefix + "leader_outlook_url"] = card.leader_outlook_url || ""
+
+        for (var employeeIndex = 1; employeeIndex <= 8; employeeIndex++) {
+          target[prefix + "emp_" + employeeIndex + "_id"] = card["emp_" + employeeIndex + "_id"] || ""
+          target[prefix + "emp_" + employeeIndex + "_name"] = card["emp_" + employeeIndex + "_name"] || ""
+          target[prefix + "emp_" + employeeIndex + "_title"] = card["emp_" + employeeIndex + "_title"] || ""
+          target[prefix + "emp_" + employeeIndex + "_photo"] = card["emp_" + employeeIndex + "_photo"] || ""
+          target[prefix + "emp_" + employeeIndex + "_teams_url"] = card["emp_" + employeeIndex + "_teams_url"] || ""
+          target[prefix + "emp_" + employeeIndex + "_outlook_url"] = card["emp_" + employeeIndex + "_outlook_url"] || ""
+        }
+      }
+
+      function markHiddenRecursive(nodeId) {
+        hiddenIds[nodeId] = true
+
+          ; (childrenMap[nodeId] || []).forEach(function (child) {
+            markHiddenRecursive(child.id)
+          })
+      }
+
+      areaRootNodes.forEach(function (areaRootNode) {
+        var wrapperId = "AREA_WRAPPER_" + areaRootNode.id
+        var areaId = "AREA_CARD_" + areaRootNode.id
+        var topCards = getDirectOrgChildren(areaRootNode.id)
+        var slotMap = {}
+
+        slotMap[areaRootNode.id] = {
+          slot: 0,
+          parentSlot: 0,
+          areaRoot: true,
+          name: areaRootNode.name || "",
+          title: areaRootNode.title || ""
+        }
+        var layout = {
+          roots: [],
+          cards: []
+        }
+
+        if (!topCards.length) {
+          topCards = [areaRootNode]
+        }
+
+        var nextSlot = 1
+        var cardWidth = 470
+        var cardGap = 52
+        var subtreeGap = 64
+        var outerPadding = 52
+        var areaHeaderHeight = 280
+        var cardHeaderHeight = 82
+        var leaderHeight = 142
+        var employeeHeight = 126
+        var cardBottomPadding = 24
+        var rowGap = 70
+        var topDefs = []
+
+        function getCardHeightByCount(employeeCount) {
+          return cardHeaderHeight + leaderHeight + employeeCount * employeeHeight + cardBottomPadding
+        }
+
+        topCards.forEach(function (topCard) {
+          var topSlot = nextSlot++
+          var childCards = getDirectOrgChildren(topCard.id)
+          var childSlots = []
+
+          slotMap[topCard.id] = {
+            slot: topSlot,
+            parentSlot: 0,
+            name: topCard.name || "",
+            title: topCard.title || ""
+          }
+
+          childCards.forEach(function (childCard) {
+            var childSlot = nextSlot++
+            childSlots.push(childSlot)
+
+            slotMap[childCard.id] = {
+              slot: childSlot,
+              parentSlot: topSlot,
+              name: childCard.name || "",
+              title: childCard.title || ""
+            }
+          })
+
+          topDefs.push({
+            node: topCard,
+            slot: topSlot,
+            children: childCards,
+            childSlots: childSlots
+          })
+
+          layout.roots.push({
+            slot: topSlot,
+            children: childSlots
+          })
+
+          layout.cards.push({
+            slot: topSlot,
+            employeeCount: getEmployeeCount(topCard)
+          })
+
+          childCards.forEach(function (childCard, childIndex) {
+            layout.cards.push({
+              slot: childSlots[childIndex],
+              employeeCount: getEmployeeCount(childCard)
+            })
+          })
+        })
+
+        var wrapperNode = {
+          id: wrapperId,
+          pid: targetParentId,
+          node_type: "A",
+          name: "",
+          title: "",
+          photo_url: "",
+          tags: ["anchor"]
+        }
+
+        var areaNode = {
+          id: areaId,
+          pid: wrapperId,
+          node_type: "F",
+          name: areaRootNode.name || "",
+          title: areaRootNode.title || "",
+          leader_id: areaRootNode.leader_id || "",
+          leader_name: areaRootNode.leader_name || "",
+          leader_title: areaRootNode.leader_title || "",
+          leader_photo: areaRootNode.leader_photo || "",
+          leader_teams_url: areaRootNode.leader_teams_url || "",
+          leader_outlook_url: areaRootNode.leader_outlook_url || "",
+          area_index: areaIndex,
+          area_card_count: nextSlot - 1,
+          area_slot_map_json: JSON.stringify(slotMap),
+          tags: ["area_card_" + String(areaIndex)]
+        }
+
+        topDefs.forEach(function (topDef) {
+          fillAreaCardData(areaNode, topDef.slot, topDef.node)
+
+          topDef.children.forEach(function (childCard, childIndex) {
+            fillAreaCardData(areaNode, topDef.childSlots[childIndex], childCard)
+          })
+        })
+
+        var topRowMaxHeight = 0
+        var bottomRowMaxHeight = 0
+        var hasBottomRow = false
+        var contentWidth = 0
+
+        topDefs.forEach(function (topDef, topIndex) {
+          var topEmployeeCount = getEmployeeCount(topDef.node)
+          var topCardHeight = getCardHeightByCount(topEmployeeCount)
+
+          if (topCardHeight > topRowMaxHeight) {
+            topRowMaxHeight = topCardHeight
+          }
+
+          var childWidth = topDef.children.length
+            ? topDef.children.length * cardWidth + (topDef.children.length - 1) * cardGap
+            : 0
+
+          var subtreeWidth = Math.max(cardWidth, childWidth)
+
+          if (topIndex > 0) {
+            contentWidth += subtreeGap
+          }
+
+          contentWidth += subtreeWidth
+
+          topDef.children.forEach(function (childCard) {
+            hasBottomRow = true
+
+            var childEmployeeCount = getEmployeeCount(childCard)
+            var childCardHeight = getCardHeightByCount(childEmployeeCount)
+
+            if (childCardHeight > bottomRowMaxHeight) {
+              bottomRowMaxHeight = childCardHeight
+            }
+          })
+        })
+
+        areaNode.area_layout_json = JSON.stringify(layout)
+        areaNode.area_width = Math.max(520, outerPadding * 2 + contentWidth)
+        areaNode.area_height = areaHeaderHeight + topRowMaxHeight + (hasBottomRow ? rowGap + bottomRowMaxHeight : 0) + outerPadding
+
+        function mapHiddenNodesToArea(nodeId) {
+          that._visibleNodeMap[nodeId] = areaId
+          that._areaCardByHiddenId[nodeId] = areaId
+
+            ; (childrenMap[nodeId] || []).forEach(function (child) {
+              mapHiddenNodesToArea(child.id)
+            })
+        }
+
+        mapHiddenNodesToArea(areaRootNode.id)
+        markHiddenRecursive(areaRootNode.id)
+
+        result.push(wrapperNode)
+        result.push(areaNode)
+
+        areaIndex++
+      })
+
+      nodes.forEach(function (node) {
+        if (hiddenIds[node.id]) {
+          return
+        }
+
+        result.push(node)
+      })
+
+      result.sort(function (firstNode, secondNode) {
+        if (firstNode.id === rootId) {
+          return -1
+        }
+
+        if (secondNode.id === rootId) {
+          return 1
+        }
+
+        if (firstNode.id === managementNodeId) {
+          return -1
+        }
+
+        if (secondNode.id === managementNodeId) {
+          return 1
+        }
+
+        return 0
+      })
+
+      return result
+    },
+
+    _prepareAreaCardTemplates: function (nodes) {
+      if (!window.HsOrgChartTemplates || !window.HsOrgChartTemplates.createAreaCardTemplate) {
+        return
+      }
+
+      nodes.forEach(function (node) {
+        if (!node || !node.area_index) {
+          return
+        }
+
+        window.HsOrgChartTemplates.createAreaCardTemplate(
+          node.area_index,
+          node.area_layout_json,
+          node.area_width,
+          node.area_height
+        )
+      })
+    },
+
     _sanitizeRoleTitle: function (value) {
       var text = this._sanitizeText(value)
 
@@ -1014,12 +1599,39 @@ sap.ui.define([
         binding["img_" + (index + 1)] = "emp_" + index + "_photo"
       }
 
+      for (var areaCardIndex = 1; areaCardIndex <= 12; areaCardIndex++) {
+        var areaBase = 200 + (areaCardIndex - 1) * 50
+        var areaImageBase = 100 + (areaCardIndex - 1) * 10
+
+        binding["field_" + areaBase] = "area_card_" + areaCardIndex + "_name"
+        binding["field_" + (areaBase + 1)] = "area_card_" + areaCardIndex + "_leader_name"
+        binding["field_" + (areaBase + 2)] = "area_card_" + areaCardIndex + "_leader_title"
+        binding["field_" + (areaBase + 3)] = "area_card_" + areaCardIndex + "_leader_teams_url"
+        binding["field_" + (areaBase + 4)] = "area_card_" + areaCardIndex + "_leader_outlook_url"
+        binding["field_" + (areaBase + 5)] = "area_card_" + areaCardIndex + "_leader_id"
+
+        binding["img_" + areaImageBase] = "area_card_" + areaCardIndex + "_leader_photo"
+
+        for (var areaMemberIndex = 1; areaMemberIndex <= 8; areaMemberIndex++) {
+          var memberBase = areaBase + 10 + (areaMemberIndex - 1) * 5
+
+          binding["field_" + memberBase] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_name"
+          binding["field_" + (memberBase + 1)] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_title"
+          binding["field_" + (memberBase + 2)] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_teams_url"
+          binding["field_" + (memberBase + 3)] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_outlook_url"
+          binding["field_" + (memberBase + 4)] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_id"
+
+          binding["img_" + (areaImageBase + areaMemberIndex)] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_photo"
+        }
+      }
+
       return binding
     },
 
     _createChartTags: function (nodes) {
       var tags = {
         unit: { template: "ula_custom_unit" },
+        root_unit: { template: "ula_custom_root_unit" },
         pos: { template: "ula_custom_pos" },
         emp: { template: "ula_custom_emp" },
         emp_noskills: { template: "ula_custom_emp_noskills" },
@@ -1028,6 +1640,16 @@ sap.ui.define([
       }
 
       nodes.forEach(function (node) {
+        if (node.tags) {
+          node.tags.forEach(function (tag) {
+            if (tag.indexOf("area_card_") === 0) {
+              tags[tag] = {
+                template: "ula_custom_" + tag
+              }
+            }
+          })
+        }
+
         if (!node.member_count) {
           return
         }
@@ -1062,13 +1684,30 @@ sap.ui.define([
       }
 
       chartElement.onclick = function (event) {
-        var linkElement = event.target && event.target.closest ? event.target.closest(".hs-card-action-link") : null
+        var target = event.target
+
+        var linkElement = target && target.closest ? target.closest(".hs-card-action-link") : null
 
         if (linkElement) {
-          return
+          var href =
+            linkElement.getAttribute("href") ||
+            linkElement.getAttribute("xlink:href") ||
+            linkElement.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
+            ""
+
+          if (href) {
+            if (href.indexOf("mailto:") === 0 || href.indexOf("tel:") === 0) {
+              window.location.href = href
+            } else {
+              window.open(href, "_blank", "noopener,noreferrer")
+            }
+          }
+
+          event.preventDefault()
+          event.stopPropagation()
+          return false
         }
 
-        var target = event.target
         var memberElement = target && target.closest ? target.closest(".hs-team-member-click") : null
 
         if (!memberElement) {
@@ -1095,6 +1734,7 @@ sap.ui.define([
 
         event.preventDefault()
         event.stopPropagation()
+        return false
       }.bind(this)
     },
 
@@ -1293,6 +1933,82 @@ sap.ui.define([
       fieldsContainer.appendChild(wrapper)
     },
 
+    onEmployeeSearchResultPress: function (event) {
+      var result = event.getSource().getBindingContext("searchModel").getObject()
+
+      if (!result || !result.original_node_id) {
+        return
+      }
+
+      var employeeNode = this._profileNodeMap[result.original_node_id]
+
+      if (!employeeNode) {
+        return
+      }
+
+      this.getView().getModel("searchModel").setProperty("/visible", false)
+
+      var visibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
+
+      if (visibleNodeId && this._chart) {
+        this._recreateChart(this._allNodes, 0.4)
+
+        setTimeout(function () {
+          var refreshedVisibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
+
+          if (refreshedVisibleNodeId && this._chart && this._chart.center) {
+            this._chart.center(refreshedVisibleNodeId)
+          }
+
+          setTimeout(function () {
+            if (refreshedVisibleNodeId && this._chart) {
+              this._chart.editUI.show(refreshedVisibleNodeId)
+            }
+
+            setTimeout(function () {
+              this._renderEmployeeProfile(employeeNode)
+            }.bind(this), 80)
+          }.bind(this), 250)
+        }.bind(this), 120)
+
+        return
+      }
+
+      this._renderEmployeeProfile(employeeNode)
+    },
+
+    _centerAndZoomNode: function (nodeId) {
+      if (!this._chart || !nodeId) {
+        return
+      }
+
+      setTimeout(function () {
+        if (this._chart.center) {
+          this._chart.center(nodeId)
+        }
+      }.bind(this), 250)
+    },
+
+    _findNearestDepartmentForEmployee: function (employeeId) {
+      var node = this._profileNodeMap ? this._profileNodeMap[employeeId] : null
+      var safetyCounter = 0
+
+      while (node && safetyCounter < 50) {
+        if (node.node_type === "O" && node.id !== "ROOT_MANAGEMENT") {
+          return node.id
+        }
+
+        if (!node.pid) {
+          return ""
+        }
+
+        node = this._profileNodeMap[node.pid]
+        safetyCounter++
+      }
+
+      return ""
+    },
+
     onEmployeeSearch: function (event) {
       var query = event.getParameter("newValue") || event.getParameter("query") || ""
       var normalizedQuery = String(query).toLowerCase().trim()
@@ -1319,10 +2035,6 @@ sap.ui.define([
         var duplicateKey = String(node.name || "").toLowerCase().trim()
 
         if (!duplicateKey || seen[duplicateKey]) {
-          return
-        }
-
-        if (seen[duplicateKey]) {
           return
         }
 
@@ -1367,6 +2079,16 @@ sap.ui.define([
       this.getView().getModel("searchModel").setProperty("/visible", results.length > 0)
     },
 
+    _getNodeNameById: function (nodeId) {
+      var node = this._profileNodeMap ? this._profileNodeMap[nodeId] : null
+
+      if (!node) {
+        return ""
+      }
+
+      return node.name || node.id || ""
+    },
+
     onEmployeeSearchClear: function () {
       var searchModel = this.getView().getModel("searchModel")
 
@@ -1375,34 +2097,93 @@ sap.ui.define([
       searchModel.setProperty("/visible", false)
     },
 
-    onEmployeeSearchResultPress: function (event) {
-      var result = event.getSource().getBindingContext("searchModel").getObject()
 
-      if (!result || !result.original_node_id) {
+    // _focusEmployeeInChart: function (visibleNodeId, employeeId) {
+    //   if (!this._chart || !visibleNodeId) {
+    //     return
+    //   }
+
+    //   if (this._chart.center) {
+    //     this._chart.center(visibleNodeId)
+    //   }
+
+    //   setTimeout(function () {
+    //     if (this._chart.zoom) {
+    //       this._chart.zoom(1.6)
+    //     }
+    //   }.bind(this), 120)
+
+    //   setTimeout(function () {
+    //     this._centerSvgElementByMemberId(employeeId)
+    //   }.bind(this), 350)
+
+    //   setTimeout(function () {
+    //     this._centerSvgElementByMemberId(employeeId)
+    //   }.bind(this), 650)
+    // },
+
+    // _centerSvgElementByMemberId: function (employeeId) {
+    //   if (!employeeId) {
+    //     return
+    //   }
+
+    //   var chartHost = document.getElementById("tree")
+
+    //   if (!chartHost) {
+    //     return
+    //   }
+
+    //   var targetElement = chartHost.querySelector('[data-member-id="' + employeeId + '"]')
+
+    //   if (!targetElement) {
+    //     return
+    //   }
+
+    //   var targetRect = targetElement.getBoundingClientRect()
+    //   var hostRect = chartHost.getBoundingClientRect()
+
+    //   var targetCenterX = targetRect.left + targetRect.width / 2
+    //   var targetCenterY = targetRect.top + targetRect.height / 2
+    //   var hostCenterX = hostRect.left + hostRect.width / 2
+    //   var hostCenterY = hostRect.top + hostRect.height / 2
+
+    //   var deltaX = hostCenterX - targetCenterX
+    //   var deltaY = hostCenterY - targetCenterY
+
+    //   this._moveChartViewport(deltaX, deltaY)
+    // },
+
+    _moveChartViewport: function (deltaX, deltaY) {
+      if (!this._chart) {
         return
       }
 
-      var node = this._profileNodeMap[result.original_node_id]
-
-      if (!node) {
+      if (this._chart.move) {
+        this._chart.move(deltaX, deltaY)
         return
       }
 
-      this.getView().getModel("searchModel").setProperty("/visible", false)
+      var chartHost = document.getElementById("tree")
+      var svg = chartHost ? chartHost.querySelector("svg") : null
+      var movableGroup = svg ? svg.querySelector("g") : null
 
-      var visibleNodeId = this._findVisibleNodeForEmployee(node)
-
-      if (visibleNodeId && this._chart) {
-        this._chart.editUI.show(visibleNodeId)
-
-        setTimeout(function () {
-          this._renderEmployeeProfile(node)
-        }.bind(this), 50)
-
+      if (!movableGroup) {
         return
       }
 
-      this._renderEmployeeProfile(node)
+      var transform = movableGroup.getAttribute("transform") || ""
+      var match = transform.match(/translate\((-?\d+\.?\d*)[ ,](-?\d+\.?\d*)\)/)
+
+      if (!match) {
+        return
+      }
+
+      var currentX = parseFloat(match[1])
+      var currentY = parseFloat(match[2])
+      var newX = currentX + deltaX
+      var newY = currentY + deltaY
+
+      movableGroup.setAttribute("transform", transform.replace(/translate\((-?\d+\.?\d*)[ ,](-?\d+\.?\d*)\)/, "translate(" + newX + " " + newY + ")"))
     },
 
     _findVisibleNodeForEmployee: function (employeeNode) {
@@ -1414,14 +2195,14 @@ sap.ui.define([
         return employeeNode.id
       }
 
+      if (this._visibleNodeMap && this._visibleNodeMap[employeeNode.id]) {
+        return this._visibleNodeMap[employeeNode.id]
+      }
+
       var resultId = ""
 
       Object.keys(this._nodeMap || {}).some(function (nodeId) {
         var node = this._nodeMap[nodeId]
-
-        if (!node.member_count) {
-          return false
-        }
 
         if (node.leader_id === employeeNode.id) {
           resultId = node.id
@@ -1432,6 +2213,20 @@ sap.ui.define([
           if (node["emp_" + index + "_id"] === employeeNode.id) {
             resultId = node.id
             return true
+          }
+        }
+
+        for (var areaCardIndex = 1; areaCardIndex <= 12; areaCardIndex++) {
+          if (node["area_card_" + areaCardIndex + "_leader_id"] === employeeNode.id) {
+            resultId = node.id
+            return true
+          }
+
+          for (var employeeIndex = 1; employeeIndex <= 8; employeeIndex++) {
+            if (node["area_card_" + areaCardIndex + "_emp_" + employeeIndex + "_id"] === employeeNode.id) {
+              resultId = node.id
+              return true
+            }
           }
         }
 

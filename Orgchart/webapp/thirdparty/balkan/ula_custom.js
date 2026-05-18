@@ -186,25 +186,16 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     var xOffset = columnIndex * columnWidth
     var y = contentY + headerHeight + rowIndex * rowHeight
 
-    if (row === 0) {
-      node +=
-        '<rect x="' + (xOffset + 12) + '" y="' + (y - 6) + '" width="406" height="140" rx="20" ry="20" fill="#d8eaff" opacity="0.55"></rect>' +
-        '<rect x="' + (xOffset + 18) + '" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#0a6ed1" stroke-width="3"></rect>' +
-        '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="30" fill="#eaf4ff" stroke="#0a6ed1" stroke-width="2.6"></circle>' +
-        '<rect x="' + (xOffset + 300) + '" y="' + (y + 14) + '" width="88" height="24" rx="12" ry="12" fill="#eaf4ff" stroke="#b8dcff" stroke-width="1"></rect>' +
-        '<text style="font-size:10px;font-weight:800;letter-spacing:0.4px;" fill="#0a6ed1" x="' + (xOffset + 344) + '" y="' + (y + 30) + '" text-anchor="middle">LEITUNG</text>'
-    } else {
-      node +=
-        '<rect x="' + (xOffset + 18) + '" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
-        '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="28" fill="#edf4ff"></circle>'
-    }
+    node +=
+      '<rect x="' + (xOffset + 12) + '" y="' + (y - 6) + '" width="406" height="140" rx="20" ry="20" fill="#d8eaff" opacity="0.55"></rect>' +
+      '<rect x="' + (xOffset + 18) + '" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#0a6ed1" stroke-width="3"></rect>' +
+      '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="30" fill="#eaf4ff" stroke="#0a6ed1" stroke-width="2.6"></circle>'
 
     node +=
       '<rect x="' + (xOffset + 30) + '" y="' + (y + 82) + '" width="162" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
       '<circle cx="' + (xOffset + 58) + '" cy="' + (y + 99) + '" r="8" fill="#0a6ed1"></circle>' +
       '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (xOffset + 58) + '" y="' + (y + 103) + '" text-anchor="middle">T</text>' +
       '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (xOffset + 112) + '" y="' + (y + 104) + '" text-anchor="middle">Teams</text>' +
-
       '<rect x="' + (xOffset + 212) + '" y="' + (y + 82) + '" width="162" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
       '<rect x="' + (xOffset + 240) + '" y="' + (y + 92) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
       '<path d="M' + (xOffset + 242) + ' ' + (y + 94) + ' L' + (xOffset + 248) + ' ' + (y + 99) + ' L' + (xOffset + 254) + ' ' + (y + 94) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
@@ -288,9 +279,6 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   OrgChart.templates[templateName].link =
     '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
     '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
-
-
-
 }
 
 
@@ -337,9 +325,455 @@ OrgChart.templates.ula_custom_anchor.field_4 = ''
 OrgChart.templates.ula_custom_anchor.field_5 = ''
 OrgChart.templates.ula_custom_anchor.img_0 = ''
 
-// OrgChart.templates.ula_custom_anchor.plus = ''
-// OrgChart.templates.ula_custom_anchor.minus = ''
-
 OrgChart.templates.ula_custom_anchor.link =
   '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
   '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+
+
+window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJson, areaWidth, areaHeight) {
+  var templateName = "ula_custom_area_card_" + String(areaIndex)
+  var outerPadding = 52
+  var cardWidth = 470
+  var cardGap = 52
+  var subtreeGap = 64
+  var layout = layoutJson ? JSON.parse(layoutJson) : { roots: [], cards: [] }
+
+
+
+  var hideRootConnector = !!layout.hideRootConnector
+  var hideHeaderLeader = !!layout.hideHeaderLeader
+  var hideAreaTitle = !!layout.hideAreaTitle
+  var hideOuterFrame = !!layout.hideOuterFrame
+  var areaHeaderHeight = hideOuterFrame && hideRootConnector && hideAreaTitle && hideHeaderLeader ? 24 : hideAreaTitle ? (hideHeaderLeader ? 72 : 222) : (hideHeaderLeader ? 130 : 280)
+  if (layout.managementOnly) {
+    OrgChart.templates[templateName] = Object.assign({}, OrgChart.templates.ula)
+    OrgChart.templates[templateName].size = [areaWidth, areaHeight]
+
+    var managementPersonWidth = 434
+    var managementPersonGap = 36
+    var managementOuterPadding = 52
+    var managementPersonY = 120
+    var managementEmployeeCount = layout.employeeCount || 0
+
+    OrgChart.templates[templateName].defs =
+      '<filter id="' + templateName + '_shadow" x="-20%" y="-20%" width="160%" height="160%">' +
+      '<feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#1f2937" flood-opacity="0.12"></feDropShadow>' +
+      '</filter>'
+
+    var managementNode =
+      '<g>' +
+      '<rect x="0" y="16" width="' + areaWidth + '" height="' + (areaHeight - 16) + '" rx="22" ry="22" fill="#ffffff" stroke="#0a6ed1" stroke-width="7" filter="url(#' + templateName + '_shadow)"></rect>' +
+      '<rect x="' + (centerX - 210) + '" y="0" width="420" height="56" rx="12" ry="12" fill="#0a6ed1"></rect>'
+
+    for (var managementIndex = 1; managementIndex <= managementEmployeeCount; managementIndex++) {
+      var personX = managementOuterPadding + (managementIndex - 1) * (managementPersonWidth + managementPersonGap)
+      var personY = managementPersonY
+
+      OrgChart.templates[templateName].defs +=
+        '<clipPath id="' + templateName + '_management_emp_' + managementIndex + '_circle">' +
+        '<circle cx="' + (personX + 42) + '" cy="' + (personY + 34) + '" r="28"></circle>' +
+        '</clipPath>'
+
+      managementNode +=
+        '<rect x="' + personX + '" y="' + personY + '" width="' + managementPersonWidth + '" height="112" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
+        '<circle cx="' + (personX + 42) + '" cy="' + (personY + 34) + '" r="28" fill="#edf4ff"></circle>' +
+        '<rect x="' + (personX + 12) + '" y="' + (personY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+        '<circle cx="' + (personX + 42) + '" cy="' + (personY + 85) + '" r="8" fill="#0a6ed1"></circle>' +
+        '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (personX + 42) + '" y="' + (personY + 89) + '" text-anchor="middle">T</text>' +
+        '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (personX + 104) + '" y="' + (personY + 90) + '" text-anchor="middle">Teams</text>' +
+        '<rect x="' + (personX + 212) + '" y="' + (personY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+        '<rect x="' + (personX + 242) + '" y="' + (personY + 79) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+        '<path d="M' + (personX + 244) + ' ' + (personY + 81) + ' L' + (personX + 250) + ' ' + (personY + 86) + ' L' + (personX + 256) + ' ' + (personY + 81) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+        '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (personX + 312) + '" y="' + (personY + 90) + '" text-anchor="middle">Outlook</text>'
+    }
+
+    managementNode += '</g>'
+
+    OrgChart.templates[templateName].node = managementNode
+
+    OrgChart.templates[templateName].field_0 =
+      '<text data-width="390" data-text-overflow="ellipsis" style="font-size:22px;font-weight:900;" fill="#ffffff" x="' + centerX + '" y="36" text-anchor="middle">{val}</text>'
+
+    for (var employeeIndex = 1; employeeIndex <= managementEmployeeCount; employeeIndex++) {
+      var fieldBase = 200
+      var employeeBase = fieldBase + 10 + (employeeIndex - 1) * 5
+      var fieldImageBase = 100
+      var personFieldX = managementOuterPadding + (employeeIndex - 1) * (managementPersonWidth + managementPersonGap)
+      var personFieldY = managementPersonY
+
+      OrgChart.templates[templateName]["img_" + (fieldImageBase + employeeIndex)] =
+        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_management_emp_' + employeeIndex + '_circle)" xlink:href="{val}" x="' + (personFieldX + 14) + '" y="' + (personFieldY + 6) + '" width="56" height="56"></image>'
+
+      OrgChart.templates[templateName]["field_" + employeeBase] =
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (personFieldX + 82) + '" y="' + (personFieldY + 28) + '">{val}</text>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 1)] =
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (personFieldX + 82) + '" y="' + (personFieldY + 50) + '">{val}</text>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 2)] =
+        '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+        '<rect x="' + (personFieldX + 12) + '" y="' + (personFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '</a>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 3)] =
+        '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+        '<rect x="' + (personFieldX + 212) + '" y="' + (personFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '</a>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 4)] =
+        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + personFieldX + '" y="' + personFieldY + '" width="' + managementPersonWidth + '" height="68" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    }
+
+    OrgChart.templates[templateName].link =
+      '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
+      '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+
+    return
+  }
+  var cardHeaderHeight = 82
+  var leaderHeight = 142
+  var employeeHeight = 126
+  var cardBottomPadding = 24
+  var rowGap = 70
+  var centerX = areaWidth / 2
+  var topRowY = areaHeaderHeight
+  var cardMetaMap = {}
+  var positions = {}
+
+    ; (layout.cards || []).forEach(function (cardMeta) {
+      cardMetaMap[cardMeta.slot] = cardMeta
+    })
+
+  function getCardHeight(slot) {
+    var meta = cardMetaMap[slot] || { employeeCount: 0 }
+    return cardHeaderHeight + (meta.hideLeader ? 0 : leaderHeight) + (meta.employeeCount || 0) * employeeHeight + cardBottomPadding
+  }
+
+  var topRowMaxHeight = 0
+
+    ; (layout.roots || []).forEach(function (root) {
+      var topHeight = getCardHeight(root.slot)
+
+      if (topHeight > topRowMaxHeight) {
+        topRowMaxHeight = topHeight
+      }
+    })
+
+  var bottomRowY = topRowY + topRowMaxHeight + rowGap
+  var currentX = outerPadding
+
+    ; (layout.roots || []).forEach(function (root) {
+      var childCount = root.children.length
+      var childWidth = childCount ? childCount * cardWidth + (childCount - 1) * cardGap : 0
+      var subtreeWidth = Math.max(cardWidth, childWidth)
+      var parentX = currentX + (subtreeWidth - cardWidth) / 2
+
+      positions[root.slot] = {
+        x: parentX,
+        y: topRowY
+      }
+
+      if (childCount) {
+        var childStartX = currentX + (subtreeWidth - childWidth) / 2
+
+        root.children.forEach(function (childSlot, childIndex) {
+          positions[childSlot] = {
+            x: childStartX + childIndex * (cardWidth + cardGap),
+            y: bottomRowY
+          }
+        })
+      }
+
+      currentX += subtreeWidth + subtreeGap
+    })
+
+  OrgChart.templates[templateName] = Object.assign({}, OrgChart.templates.ula)
+  OrgChart.templates[templateName].size = [areaWidth, areaHeight]
+
+  OrgChart.templates[templateName].defs =
+    '<filter id="' + templateName + '_shadow" x="-20%" y="-20%" width="160%" height="160%">' +
+    '<feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#1f2937" flood-opacity="0.12"></feDropShadow>' +
+    '</filter>' +
+    '<clipPath id="' + templateName + '_leader_circle">' +
+    '<circle cx="' + (centerX - 165) + '" cy="126" r="32"></circle>' +
+    '</clipPath>'
+
+  var node = '<g>'
+
+  if (!hideOuterFrame) {
+    node +=
+      '<rect x="0" y="16" width="' + areaWidth + '" height="' + (areaHeight - 16) + '" rx="22" ry="22" fill="#ffffff" stroke="#0a6ed1" stroke-width="7" filter="url(#' + templateName + '_shadow)"></rect>'
+  }
+
+  if (!hideAreaTitle) {
+    node +=
+      '<rect x="' + (centerX - 210) + '" y="0" width="420" height="56" rx="12" ry="12" fill="#0a6ed1"></rect>'
+  }
+  if (!hideHeaderLeader) {
+    node +=
+      '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + centerX + ' 56 L' + centerX + ' 82"></path>' +
+      '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + centerX + ' 56 L' + centerX + ' 82"></path>' +
+      '<rect x="' + (centerX - 220) + '" y="82" width="440" height="132" rx="18" ry="18" fill="#ffffff" stroke="#0a6ed1" stroke-width="3" filter="url(#' + templateName + '_shadow)"></rect>' +
+      '<rect x="' + (centerX - 208) + '" y="94" width="416" height="108" rx="14" ry="14" fill="#ffffff" stroke="#e7eef5" stroke-width="1"></rect>' +
+      '<circle cx="' + (centerX - 165) + '" cy="126" r="32" fill="#edf4ff"></circle>' +
+      '<rect x="' + (centerX + 120) + '" y="104" width="78" height="24" rx="12" ry="12" fill="#eaf4ff" stroke="#b8dcff" stroke-width="1"></rect>' +
+      '<text style="font-size:10px;font-weight:800;letter-spacing:0.4px;" fill="#0a6ed1" x="' + (centerX + 159) + '" y="120" text-anchor="middle">LEITUNG</text>' +
+      '<rect x="' + (centerX - 145) + '" y="160" width="130" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+      '<circle cx="' + (centerX - 118) + '" cy="177" r="8" fill="#0a6ed1"></circle>' +
+      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (centerX - 118) + '" y="181" text-anchor="middle">T</text>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (centerX - 78) + '" y="181" text-anchor="middle">Teams</text>' +
+      '<rect x="' + (centerX - 5) + '" y="160" width="150" height="34" rx="10" ry="10" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+      '<rect x="' + (centerX + 22) + '" y="170" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+      '<path d="M' + (centerX + 24) + ' 172 L' + (centerX + 30) + ' 177 L' + (centerX + 36) + ' 172" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (centerX + 82) + '" y="181" text-anchor="middle">Outlook</text>'
+  }
+
+  var rootConnectorY = 0
+
+  if ((layout.roots || []).length && !hideRootConnector) {
+    var firstRoot = layout.roots[0]
+    var lastRoot = layout.roots[layout.roots.length - 1]
+    var firstRootCenterX = positions[firstRoot.slot].x + cardWidth / 2
+    var lastRootCenterX = positions[lastRoot.slot].x + cardWidth / 2
+
+    rootConnectorY = hideAreaTitle ? 54 : (hideHeaderLeader ? 84 : 248)
+
+    var rootConnectorStartY = hideAreaTitle ? 18 : (hideHeaderLeader ? 18 : 214)
+
+    node +=
+      '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + centerX + ' ' + rootConnectorStartY + ' L' + centerX + ' ' + rootConnectorY + '"></path>' +
+      '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + centerX + ' ' + rootConnectorStartY + ' L' + centerX + ' ' + rootConnectorY + '"></path>' +
+      '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + firstRootCenterX + ' ' + rootConnectorY + ' L' + lastRootCenterX + ' ' + rootConnectorY + '"></path>' +
+      '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + firstRootCenterX + ' ' + rootConnectorY + ' L' + lastRootCenterX + ' ' + rootConnectorY + '"></path>'
+  }
+  function drawPersonCard(x, y, isLeader) {
+    var badge = ''
+
+    if (isLeader) {
+      badge =
+        '<rect x="' + (x + 318) + '" y="' + (y + 14) + '" width="96" height="24" rx="12" ry="12" fill="#eaf4ff" stroke="#b8dcff" stroke-width="1"></rect>' +
+        '<text style="font-size:10px;font-weight:800;letter-spacing:0.4px;" fill="#0a6ed1" x="' + (x + 366) + '" y="' + (y + 30) + '" text-anchor="middle">LEITUNG</text>'
+    }
+
+    return '' +
+      '<rect x="' + x + '" y="' + y + '" width="' + (cardWidth - 36) + '" height="112" rx="16" ry="16" fill="#ffffff" stroke="' + (isLeader ? '#0a6ed1' : '#d7e0ea') + '" stroke-width="' + (isLeader ? '3' : '1.2') + '"></rect>' +
+      '<circle cx="' + (x + 42) + '" cy="' + (y + 34) + '" r="' + (isLeader ? '30' : '28') + '" fill="#edf4ff" stroke="' + (isLeader ? '#0a6ed1' : '#edf4ff') + '" stroke-width="' + (isLeader ? '2.6' : '1') + '"></circle>' +
+      badge +
+      '<rect x="' + (x + 12) + '" y="' + (y + 68) + '" width="176" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+      '<circle cx="' + (x + 42) + '" cy="' + (y + 85) + '" r="8" fill="#0a6ed1"></circle>' +
+      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (x + 42) + '" y="' + (y + 89) + '" text-anchor="middle">T</text>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (x + 104) + '" y="' + (y + 90) + '" text-anchor="middle">Teams</text>' +
+      '<rect x="' + (x + 212) + '" y="' + (y + 68) + '" width="176" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+      '<rect x="' + (x + 242) + '" y="' + (y + 79) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+      '<path d="M' + (x + 244) + ' ' + (y + 81) + ' L' + (x + 250) + ' ' + (y + 86) + ' L' + (x + 256) + ' ' + (y + 81) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (x + 312) + '" y="' + (y + 90) + '" text-anchor="middle">Outlook</text>'
+  }
+
+  function drawCardFrame(x, y, cardHeight, hideLeader) {
+    var html = '' +
+      '<rect x="' + x + '" y="' + y + '" width="' + cardWidth + '" height="' + cardHeight + '" rx="20" ry="20" fill="#ffffff" stroke="#0a6ed1" stroke-width="7"></rect>' +
+      '<rect x="' + x + '" y="' + y + '" width="' + cardWidth + '" height="82" rx="20" ry="20" fill="#0a6ed1"></rect>' +
+      '<rect x="' + x + '" y="' + (y + 58) + '" width="' + cardWidth + '" height="26" fill="#0a6ed1"></rect>'
+
+    if (!hideLeader) {
+      html += drawPersonCard(x + 18, y + 98, true)
+    }
+
+    return html
+  }
+
+  function drawEmployeeRows(x, y, employeeCount, hideLeader) {
+    var html = ''
+    var startY = y + cardHeaderHeight + (hideLeader ? 0 : leaderHeight)
+
+    for (var employeeIndex = 1; employeeIndex <= employeeCount; employeeIndex++) {
+      var employeeY = startY + (employeeIndex - 1) * employeeHeight
+      html += drawPersonCard(x + 18, employeeY, false)
+    }
+
+    return html
+  }
+
+  (layout.roots || []).forEach(function (root) {
+    var parentPos = positions[root.slot]
+    var parentHeight = getCardHeight(root.slot)
+    var parentCenterX = parentPos.x + cardWidth / 2
+    var parentConnector = ""
+
+    if (!hideRootConnector) {
+      parentConnector =
+        '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + parentCenterX + ' ' + rootConnectorY + ' L' + parentCenterX + ' ' + parentPos.y + '"></path>' +
+        '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + parentCenterX + ' ' + rootConnectorY + ' L' + parentCenterX + ' ' + parentPos.y + '"></path>'
+    }
+
+    node +=
+      parentConnector +
+      drawCardFrame(parentPos.x, parentPos.y, parentHeight, !!(cardMetaMap[root.slot] || {}).hideLeader) +
+      drawEmployeeRows(parentPos.x, parentPos.y, (cardMetaMap[root.slot] || {}).employeeCount || 0, !!(cardMetaMap[root.slot] || {}).hideLeader)
+
+    if (root.children.length) {
+      var firstChildSlot = root.children[0]
+      var lastChildSlot = root.children[root.children.length - 1]
+      var firstChildCenterX = positions[firstChildSlot].x + cardWidth / 2
+      var lastChildCenterX = positions[lastChildSlot].x + cardWidth / 2
+      var childrenConnectorY = parentPos.y + parentHeight + 30
+
+      node +=
+        '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + parentCenterX + ' ' + (parentPos.y + parentHeight) + ' L' + parentCenterX + ' ' + childrenConnectorY + '"></path>' +
+        '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + parentCenterX + ' ' + (parentPos.y + parentHeight) + ' L' + parentCenterX + ' ' + childrenConnectorY + '"></path>' +
+        '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + firstChildCenterX + ' ' + childrenConnectorY + ' L' + lastChildCenterX + ' ' + childrenConnectorY + '"></path>' +
+        '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + firstChildCenterX + ' ' + childrenConnectorY + ' L' + lastChildCenterX + ' ' + childrenConnectorY + '"></path>'
+
+      root.children.forEach(function (childSlot) {
+        var childPos = positions[childSlot]
+        var childHeight = getCardHeight(childSlot)
+        var childCenterX = childPos.x + cardWidth / 2
+
+        node +=
+          '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + childCenterX + ' ' + childrenConnectorY + ' L' + childCenterX + ' ' + childPos.y + '"></path>' +
+          '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + childCenterX + ' ' + childrenConnectorY + ' L' + childCenterX + ' ' + childPos.y + '"></path>' +
+          drawCardFrame(childPos.x, childPos.y, childHeight, !!(cardMetaMap[childSlot] || {}).hideLeader) +
+          drawEmployeeRows(childPos.x, childPos.y, (cardMetaMap[childSlot] || {}).employeeCount || 0, !!(cardMetaMap[childSlot] || {}).hideLeader)
+      })
+    }
+  })
+
+  node += '</g>'
+
+  OrgChart.templates[templateName].node = node
+
+  OrgChart.templates[templateName].field_0 = hideAreaTitle
+    ? ''
+    : '<text data-width="390" data-text-overflow="ellipsis" style="font-size:22px;font-weight:900;" fill="#ffffff" x="' + centerX + '" y="36" text-anchor="middle">{val}</text>'
+
+  OrgChart.templates[templateName].img_1 =
+    '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_leader_circle)" xlink:href="{val}" x="' + (centerX - 197) + '" y="94" width="64" height="64"></image>'
+
+  OrgChart.templates[templateName].field_6 =
+    '<text data-width="230" data-text-overflow="ellipsis" style="font-size:16px;font-weight:900;" fill="#102a43" x="' + (centerX - 110) + '" y="126">{val}</text>'
+
+  OrgChart.templates[templateName].field_7 =
+    '<text data-width="230" data-text-overflow="ellipsis" style="font-size:13px;font-weight:700;" fill="#0a6ed1" x="' + (centerX - 110) + '" y="150">{val}</text>'
+
+  OrgChart.templates[templateName].field_8 =
+    '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+    '<rect x="' + (centerX - 145) + '" y="160" width="130" height="34" rx="10" ry="10" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '</a>'
+
+  OrgChart.templates[templateName].field_9 =
+    '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+    '<rect x="' + (centerX - 5) + '" y="160" width="150" height="34" rx="10" ry="10" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '</a>'
+
+  OrgChart.templates[templateName].field_10 =
+    '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (centerX - 220) + '" y="82" width="440" height="132" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+
+  for (var slot = 1; slot <= 12; slot++) {
+    if (!positions[slot]) {
+      continue
+    }
+
+    var fieldBase = 200 + (slot - 1) * 50
+    var fieldImageBase = 100 + (slot - 1) * 10
+    var fieldX = positions[slot].x
+    var fieldY = positions[slot].y
+    var fieldEmployeeCount = (cardMetaMap[slot] || {}).employeeCount || 0
+    var fieldHideLeader = !!(cardMetaMap[slot] || {}).hideLeader
+
+    OrgChart.templates[templateName].defs +=
+      '<clipPath id="' + templateName + '_card_' + slot + '_leader_circle">' +
+      '<circle cx="' + (fieldX + 60) + '" cy="' + (fieldY + 132) + '" r="30"></circle>' +
+      '</clipPath>'
+
+    OrgChart.templates[templateName]["field_" + fieldBase] =
+      '<text data-width="' + (cardWidth - 40) + '" data-text-overflow="ellipsis" style="font-size:16px;font-weight:900;" fill="#ffffff" x="' + (fieldX + cardWidth / 2) + '" y="' + (fieldY + 34) + '" text-anchor="middle">{val}</text>'
+
+    if (!fieldHideLeader) {
+      OrgChart.templates[templateName]["img_" + fieldImageBase] =
+        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_leader_circle)" xlink:href="{val}" x="' + (fieldX + 30) + '" y="' + (fieldY + 102) + '" width="60" height="60"></image>'
+
+      OrgChart.templates[templateName]["field_" + (fieldBase + 1)] =
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (fieldX + 122) + '" y="' + (fieldY + 126) + '">{val}</text>'
+
+      OrgChart.templates[templateName]["field_" + (fieldBase + 2)] =
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (fieldX + 122) + '" y="' + (fieldY + 148) + '">{val}</text>'
+
+      OrgChart.templates[templateName]["field_" + (fieldBase + 3)] =
+        '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+        '<rect x="' + (fieldX + 30) + '" y="' + (fieldY + 166) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '</a>'
+
+      OrgChart.templates[templateName]["field_" + (fieldBase + 4)] =
+        '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+        '<rect x="' + (fieldX + 230) + '" y="' + (fieldY + 166) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '</a>'
+
+      OrgChart.templates[templateName]["field_" + (fieldBase + 5)] =
+        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (fieldX + 18) + '" y="' + (fieldY + 98) + '" width="' + (cardWidth - 36) + '" height="62" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    } else {
+
+      OrgChart.templates[templateName]["img_" + fieldImageBase] = ''
+      OrgChart.templates[templateName]["field_" + (fieldBase + 1)] = ''
+      OrgChart.templates[templateName]["field_" + (fieldBase + 2)] = ''
+      OrgChart.templates[templateName]["field_" + (fieldBase + 3)] = ''
+      OrgChart.templates[templateName]["field_" + (fieldBase + 4)] = ''
+      OrgChart.templates[templateName]["field_" + (fieldBase + 5)] = ''
+    }
+    for (var employeeFieldIndex = 1; employeeFieldIndex <= fieldEmployeeCount; employeeFieldIndex++) {
+      var employeeFieldY = fieldY + cardHeaderHeight + (fieldHideLeader ? 0 : leaderHeight) + (employeeFieldIndex - 1) * employeeHeight
+      var employeeBase = fieldBase + 10 + (employeeFieldIndex - 1) * 5
+
+      OrgChart.templates[templateName].defs +=
+        '<clipPath id="' + templateName + '_card_' + slot + '_emp_' + employeeFieldIndex + '_circle">' +
+        '<circle cx="' + (fieldX + 60) + '" cy="' + (employeeFieldY + 34) + '" r="28"></circle>' +
+        '</clipPath>'
+
+      OrgChart.templates[templateName]["img_" + (fieldImageBase + employeeFieldIndex)] =
+        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_emp_' + employeeFieldIndex + '_circle)" xlink:href="{val}" x="' + (fieldX + 32) + '" y="' + (employeeFieldY + 6) + '" width="56" height="56"></image>'
+
+      OrgChart.templates[templateName]["field_" + employeeBase] =
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (fieldX + 122) + '" y="' + (employeeFieldY + 28) + '">{val}</text>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 1)] =
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (fieldX + 122) + '" y="' + (employeeFieldY + 50) + '">{val}</text>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 2)] =
+        '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+        '<rect x="' + (fieldX + 30) + '" y="' + (employeeFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '</a>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 3)] =
+        '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
+        '<rect x="' + (fieldX + 230) + '" y="' + (employeeFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '</a>'
+
+      OrgChart.templates[templateName]["field_" + (employeeBase + 4)] =
+        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (fieldX + 18) + '" y="' + employeeFieldY + '" width="' + (cardWidth - 36) + '" height="62" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    }
+  }
+
+  OrgChart.templates[templateName].link =
+    '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
+    '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+}
+
+
+OrgChart.templates.ula_custom_root_unit = Object.assign({}, OrgChart.templates.ula_custom_unit)
+OrgChart.templates.ula_custom_root_unit.size = [350, 162]
+
+OrgChart.templates.ula_custom_root_unit.node =
+  '<g>' +
+  '<rect x="0" y="12" width="350" height="150" rx="18" ry="18" fill="#0a6ed1" stroke="#085caf" stroke-width="1.2" filter="url(#ula_custom_emp_shadow)"></rect>' +
+  '</g>'
+
+OrgChart.templates.ula_custom_root_unit.img_0 = ''
+OrgChart.templates.ula_custom_root_unit.field_0 = OrgChart.templates.ula_custom_unit.field_0
+OrgChart.templates.ula_custom_root_unit.field_1 = OrgChart.templates.ula_custom_unit.field_1
+OrgChart.templates.ula_custom_root_unit.field_2 = ''
+OrgChart.templates.ula_custom_root_unit.field_3 = ''
+OrgChart.templates.ula_custom_root_unit.field_4 = ''
+OrgChart.templates.ula_custom_root_unit.field_5 = ''
+
+OrgChart.templates.ula_custom_root_unit.link =
+  '<path stroke="#bfd0e2" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
+  '<path stroke="#7fa7d6" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
