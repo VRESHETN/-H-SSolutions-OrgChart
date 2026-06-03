@@ -1,4 +1,5 @@
 .hs-orgchart-popup {
+  position: relative;
   max-width: 560px !important;
   border: 1px solid #d9e5f0 !important;
   border-radius: 22px !important;
@@ -34,6 +35,51 @@
   background: #ffffff !important;
 }
 
+.hs-orgchart-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #f4f7fa;
+  color: #334e68;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 50;
+}
+
+.hs-orgchart-popup-close:hover {
+  background: #e6edf5;
+}
+
+.hs-orgchart-popup button:not(.hs-orgchart-popup-close) {
+  display: none !important;
+}
+
+.hs-orgchart-popup .hs-orgchart-popup-close {
+  display: block !important;
+}
+
+.hs-orgchart-popup .boc-edit-form-footer,
+.hs-orgchart-popup .boc-edit-form-buttons,
+.hs-orgchart-popup .boc-edit-form-actions,
+[data-boc-edit-form-btns],
+.boc-edit-form-instruments {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
 .hs-orgchart-profile {
   display: flex;
   flex-direction: column;
@@ -53,8 +99,8 @@
 
 .hs-orgchart-profile-image {
   display: block;
-  width: 110px;
-  height: 110px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
@@ -114,6 +160,14 @@
   text-transform: uppercase;
 }
 
+.hs-orgchart-text-value {
+  color: #102a43;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
 .hs-orgchart-link {
   display: inline-block !important;
   color: #102a43;
@@ -136,53 +190,6 @@
 
 .hs-orgchart-link-dark {
   color: #102a43 !important;
-}
-
-.hs-orgchart-profile-button {
-  width: 100%;
-  margin-top: 6px;
-  padding: 15px 18px;
-  border: 0;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #0a6ed1, #1b84f2);
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.2;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(10, 110, 209, 0.25);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.hs-orgchart-profile-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(10, 110, 209, 0.32);
-}
-
-.hs-orgchart-profile-button:focus {
-  outline: 2px solid #0a6ed1;
-  outline-offset: 2px;
-}
-
-[data-boc-edit-form-btns],
-.boc-edit-form-instruments {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: 0 !important;
-}
-
-.hs-orgchart-text-value {
-  color: #102a43;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.45;
-  word-break: break-word;
 }
 
 .hs-orgchart-actions {
@@ -265,4 +272,60 @@
   font-weight: 600;
   line-height: 1.35;
   word-break: break-word;
+}
+
+.hsOrgChartHeader {
+  gap: 12px;
+}
+
+.hsOrgChartFilterFields {
+  flex: 1 1 680px;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hsOrgChartFilterItem {
+  min-width: 260px;
+  max-width: 420px;
+}
+
+.hsOrgChartFilterButtons {
+  flex: 0 1 auto;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .hsOrgChartFilterFields {
+    flex-basis: 100%;
+  }
+
+  .hsOrgChartFilterItem {
+    max-width: none;
+    width: 100%;
+  }
+
+  .hsOrgChartFilterButtons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .hsOrgChartFilterFields {
+    flex-direction: column;
+  }
+
+  .hsOrgChartFilterButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hsOrgChartFilterButtons .sapMBtn {
+    width: 100%;
+  }
+
+  .hsOrgChartFilterButtons .sapUiTinyMarginBegin {
+    margin-left: 0 !important;
+    margin-top: 8px;
+  }
 }

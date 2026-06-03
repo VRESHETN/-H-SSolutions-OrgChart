@@ -16,48 +16,43 @@
 
         <f:header>
             <f:DynamicPageHeader id="_IDGenDynamicPageHeader" pinnable="true">
-                <HBox id="_IDGenHBox" width="100%" alignItems="End" justifyContent="SpaceBetween">
+                <FlexBox id="headerContentBox" width="100%" direction="Row" wrap="Wrap" alignItems="End" justifyContent="SpaceBetween" class="hsOrgChartHeader">
 
-                    <HBox id="_IDGenHBox1" alignItems="End">
-                        <VBox id="_IDGenVBox">
+                    <FlexBox id="filterFieldsBox" direction="Row" wrap="Wrap" alignItems="End" class="hsOrgChartFilterFields">
+
+                        <VBox id="_IDGenVBox" class="hsOrgChartFilterItem">
+                            <layoutData>
+                                <FlexItemData growFactor="1" shrinkFactor="1" baseSize="420px" />
+                            </layoutData>
+
                             <Label id="_IDGenLabel" text="Organisationseinheit"/>
-                            <HBox id="nodeFilterBox" width="420px" alignItems="Center">
-                                <Input id="nodeFilterDisplay" width="365px" editable="false" placeholder="Knoten auswählen" value="{treeFilterModel>/selectionText}" />
-
-                                <Button id="nodeFilterOpenButton" icon="sap-icon://value-help" press=".onOpenNodeFilterDialog" class="sapUiTinyMarginBegin" />
-                            </HBox>
+                            <Input id="nodeFilterDisplay" width="100%" editable="true" enabled="true" showValueHelp="true" valueHelpOnly="true" valueHelpRequest=".onOpenNodeFilterDialog" placeholder="Knoten auswählen" value="{treeFilterModel>/selectionText}" />
                         </VBox>
 
-                        <VBox id="_IDGenVBox1" class="sapUiSmallMarginBegin">
+                        <VBox id="_IDGenVBox1" class="hsOrgChartFilterItem">
+                            <layoutData>
+                                <FlexItemData growFactor="1" shrinkFactor="1" baseSize="420px" />
+                            </layoutData>
+
                             <Label id="_IDGenLabel1" text="Suche"/>
-                            <SearchField id="employeeSearch" width="420px" placeholder="Mitarbeiter, Rolle oder Kompetenz suchen" value="{searchModel>/query}" liveChange=".onEmployeeSearch" search=".onEmployeeSearch" />
+                            <Input id="employeeSearch" width="100%" placeholder="Mitarbeiter, Rolle oder Kompetenz suchen" value="{searchModel>/query}" showClearIcon="true" showSuggestion="true" liveChange=".onEmployeeSearchLiveChange" suggest=".onEmployeeSearch" suggestionItemSelected=".onEmployeeSuggestionSelected" suggestionItems="{searchModel>/results}">
+                                <suggestionItems>
+                                    <core:ListItem key="{searchModel>original_node_id}" text="{searchModel>name}" additionalText="{searchModel>matched_skill}" />
+                                </suggestionItems>
+                            </Input>
                         </VBox>
-                    </HBox>
 
-                    <HBox id="_IDGenHBox2" alignItems="End">
+                    </FlexBox>
+
+                    <FlexBox id="filterButtonsBox" direction="Row" wrap="Wrap" alignItems="End" justifyContent="End" class="hsOrgChartFilterButtons">
+
                         <Button id="_IDGenButton" text="Start" type="Emphasized" press="onApplyFilters" />
 
                         <Button id="_IDGenButton1" text="Filter zurücksetzen" type="Transparent" press="onClearNodeFilter" class="sapUiTinyMarginBegin" />
-                    </HBox>
 
-                </HBox>
+                    </FlexBox>
 
-                <List id="employeeSearchResults" visible="{searchModel>/visible}" items="{searchModel>/results}" width="420px">
-
-                    <CustomListItem id="_IDGenCustomListItem1" type="Active" press=".onEmployeeSearchResultPress">
-
-                        <HBox id="_IDGenHBox3" alignItems="Center" class="sapUiSmallMargin">
-                            <Avatar id="_IDGenAvatar" src="{searchModel>photo_url}" displaySize="S" class="sapUiTinyMarginEnd" />
-
-                            <VBox id="_IDGenVBox2">
-                                <Text id="_IDGenText" text="{searchModel>name}" />
-                                <Text id="_IDGenText1" text="{searchModel>matched_skill}" />
-                            </VBox>
-                        </HBox>
-
-                    </CustomListItem>
-                </List>
-
+                </FlexBox>
             </f:DynamicPageHeader>
         </f:header>
 

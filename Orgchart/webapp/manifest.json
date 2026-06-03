@@ -5,7 +5,7 @@
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.1"
+      "version": "0.0.5"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
@@ -23,6 +23,22 @@
           "annotations": [],
           "localUri": "localService/mainService/metadata.xml",
           "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "intent1": {
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          },
+          "semanticObject": "hsorgchart",
+          "action": "display",
+          "title": "{{appTitle}}",
+          "icon": "sap-icon://org-chart",
+          "info": "{{appTitle}}",
+          "subTitle": "{{appDescription}}"
         }
       }
     }
@@ -66,8 +82,7 @@
     "resources": {
       "css": [
         {
-          "uri": "/css/style.css",
-          "bundle": false
+          "uri": "css/style.css"
         }
       ],
       "js": [
@@ -112,5 +127,9 @@
       "async": true,
       "id": "App"
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "hscomorgchart"
   }
 }

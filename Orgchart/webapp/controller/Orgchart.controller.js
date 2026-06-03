@@ -6,10 +6,10 @@ sap.ui.define([
   "sap/m/StandardTreeItem",
   "sap/m/Button",
   "sap/m/VBox",
-  "sap/m/Toolbar",
-  "sap/m/ToolbarSpacer",
+  "sap/m/Bar",
+  "sap/m/Title",
   "sap/m/SearchField"
-], function (Controller, JSONModel, Dialog, Tree, StandardTreeItem, Button, VBox, Toolbar, ToolbarSpacer, SearchField) {
+], function (Controller, JSONModel, Dialog, Tree, StandardTreeItem, Button, VBox, Bar, Title, SearchField) {
   "use strict"
 
   return Controller.extend("hs.com.orgchart.controller.Orgchart", {
@@ -199,7 +199,7 @@ sap.ui.define([
         enableSearch: false,
         mouseScrool: OrgChart.action.zoom,
         nodeMouseClick: OrgChart.action.none,
-        scaleInitial: scaleInitial || OrgChart.match.boundary,
+        scaleInitial: scaleInitial || 0.35,
         padding: 80,
         levelSeparation: 80,
         siblingSeparation: 180,
@@ -225,43 +225,6 @@ sap.ui.define([
       })
 
       this._registerTeamMemberClick()
-
-      this._chart.on("click", function (sender, args) {
-        var nativeEvent = args.event || args.e || window.event
-        var target = nativeEvent && nativeEvent.target
-
-        if (target && target.closest && target.closest(".hs-card-action-link")) {
-          return false
-        }
-
-        var node = args.node
-
-        if (!node) {
-          return false
-        }
-
-        if (node.tags && node.tags.indexOf("emp") !== -1) {
-          this._chart.editUI.show(node.id)
-        }
-
-        return false
-      }.bind(this))
-
-      this._chart.editUI.on("show", function (sender, nodeId) {
-        var node = this._nodeMap[nodeId]
-
-        if (!node || !node.tags) {
-          return
-        }
-
-        if (node.tags.indexOf("emp") === -1) {
-          return
-        }
-
-        setTimeout(function () {
-          this._renderEmployeeProfile(node)
-        }.bind(this), 50)
-      }.bind(this))
     },
 
     _prepareNodeFilter: function (nodes) {
@@ -369,6 +332,9 @@ sap.ui.define([
         var tree = new Tree(this.createId("nodeFilterTree"), {
           mode: "MultiSelect",
           includeItemInSelection: true,
+          selectionChange: function (event) {
+            this.onNodeTreeSelectionChange(event)
+          }.bind(this),
           items: {
             path: "treeFilterModel>/nodes",
             parameters: {
@@ -381,19 +347,37 @@ sap.ui.define([
         })
 
         var searchField = new SearchField(this.createId("nodeFilterTreeSearch"), {
-          width: "100%",
+          width: "420px",
           placeholder: "Organisationseinheit suchen",
           liveChange: function (event) {
             this.onNodeTreeSearch(event)
           }.bind(this)
-        })
+        }).addStyleClass("sapUiSmallMarginBottom")
 
         this._nodeFilterDialog = new Dialog(this.createId("nodeFilterDialog"), {
-          title: "Organisationseinheiten auswählen",
           contentWidth: "560px",
           contentHeight: "620px",
           resizable: true,
           draggable: true,
+
+          customHeader: new Bar({
+            contentMiddle: [
+              new Title({
+                text: "Organisationseinheiten auswählen"
+              })
+            ],
+            contentRight: [
+              new Button({
+                icon: "sap-icon://decline",
+                type: "Transparent",
+                tooltip: "Schließen",
+                press: function () {
+                  this._nodeFilterDialog.close()
+                }.bind(this)
+              })
+            ]
+          }),
+
           content: [
             new VBox({
               width: "100%",
@@ -401,8 +385,9 @@ sap.ui.define([
                 searchField,
                 tree
               ]
-            })
+            }).addStyleClass("sapUiSmallMargin")
           ],
+
           buttons: [
             new Button({
               text: "Übernehmen",
@@ -410,37 +395,235 @@ sap.ui.define([
               press: function () {
                 this.onApplyNodeTreeFilter()
               }.bind(this)
-            }),
-            new Button({
-              text: "Abbrechen",
-              press: function () {
-                this._nodeFilterDialog.close()
-              }.bind(this)
             })
           ]
-        })
+        }).addStyleClass("hsNodeFilterDialog")
 
         this.getView().addDependent(this._nodeFilterDialog)
       }
 
       this._syncNodeTreeSelection()
+      // this._updateDeselectAllNodeButtonState()
+      var searchField = this.byId("nodeFilterTreeSearch")
+      var treeModel = this.getView().getModel("treeFilterModel")
+
+      if (searchField) {
+        searchField.setValue("")
+      }
+
+      if (treeModel && this._nodeFilterOriginalNodes) {
+        treeModel.setProperty("/nodes", this._cloneNodeFilterTree(this._nodeFilterOriginalNodes))
+      }
+
+      var tree = this.byId("nodeFilterTree")
+
+      if (tree) {
+        tree.expandToLevel(1)
+      }
       this._nodeFilterDialog.open()
+    },
+
+    // onSelectAllNodeTreeItems: function () {
+    //   var tree = this.byId("nodeFilterTree")
+
+    //   if (!tree) {
+    //     return
+    //   }
+
+    //   tree.getItems().forEach(function (item) {
+    //     tree.setSelectedItem(item, true)
+    //   })
+
+    //   this._updateDeselectAllNodeButtonState()
+    // },
+
+    // onDeselectAllNodeTreeItems: function () {
+    //   var tree = this.byId("nodeFilterTree")
+
+    //   if (!tree) {
+    //     return
+    //   }
+
+    //   tree.removeSelections(true)
+    //   this._updateDeselectAllNodeButtonState()
+    // },
+
+    // _updateDeselectAllNodeButtonState: function () {
+    //   var tree = this.byId("nodeFilterTree")
+    //   var button = this.byId("deselectAllNodeButton")
+
+    //   if (!tree || !button) {
+    //     return
+    //   }
+
+    //   button.setEnabled(tree.getSelectedItems().length > 0)
+    // },
+
+
+    onNodeTreeSelectionChange: function (event) {
+      var tree = this.byId("nodeFilterTree")
+      var changedItem = event.getParameter("listItem")
+      var selected = event.getParameter("selected")
+      var context
+      var object
+      var ids = []
+
+      if (!tree || !changedItem) {
+        return
+      }
+
+      context = changedItem.getBindingContext("treeFilterModel")
+      object = context ? context.getObject() : null
+
+      if (!object) {
+        return
+      }
+
+      this._collectNodeFilterChildIds(object, ids)
+
+      tree.getItems().forEach(function (item) {
+        var itemContext = item.getBindingContext("treeFilterModel")
+        var itemObject = itemContext ? itemContext.getObject() : null
+
+        if (itemObject && ids.indexOf(itemObject.id) !== -1) {
+          tree.setSelectedItem(item, selected)
+        }
+      })
+    },
+
+    _collectNodeFilterChildIds: function (node, ids) {
+      if (!node || !node.id) {
+        return
+      }
+
+      ids.push(node.id)
+
+        ; (node.children || []).forEach(function (child) {
+          this._collectNodeFilterChildIds(child, ids)
+        }.bind(this))
     },
 
     onNodeTreeSearch: function (event) {
       var query = String(event.getParameter("newValue") || "").trim()
       var tree = this.byId("nodeFilterTree")
+      var treeModel = this.getView().getModel("treeFilterModel")
+      var originalNodes
 
-      if (!tree) {
+      if (!tree || !treeModel) {
         return
       }
 
-      if (query) {
-        tree.expandToLevel(10)
-      } else {
-        tree.expandToLevel(1)
+      if (!this._nodeFilterOriginalNodes) {
+        this._nodeFilterOriginalNodes = this._cloneNodeFilterTree(treeModel.getProperty("/nodes") || [])
       }
+
+      originalNodes = this._cloneNodeFilterTree(this._nodeFilterOriginalNodes)
+
+      if (!query) {
+        treeModel.setProperty("/nodes", originalNodes)
+        tree.expandToLevel(1)
+        this._syncNodeTreeSelection()
+        // this._updateDeselectAllNodeButtonState()
+        return
+      }
+
+      treeModel.setProperty("/nodes", this._filterNodeTreeBySearch(originalNodes, query))
+      tree.expandToLevel(10)
+      this._syncNodeTreeSelection()
+      // this._updateDeselectAllNodeButtonState()
     },
+
+    _filterNodeTreeBySearch: function (nodes, query) {
+      var normalizedQuery = String(query || "").toLowerCase()
+
+      function filterNode(node) {
+        var nodeText = String(node.text || "").toLowerCase()
+        var nodeMatches = nodeText.indexOf(normalizedQuery) !== -1
+        var filteredChildren = []
+
+          ; (node.children || []).forEach(function (child) {
+            var filteredChild = filterNode(child)
+
+            if (filteredChild) {
+              filteredChildren.push(filteredChild)
+            }
+          })
+
+        if (nodeMatches) {
+          return node
+        }
+
+        if (filteredChildren.length) {
+          node.children = filteredChildren
+          return node
+        }
+
+        return null
+      }
+
+      return nodes.map(filterNode).filter(function (node) {
+        return !!node
+      })
+    },
+
+    _cloneNodeFilterTree: function (nodes) {
+      return JSON.parse(JSON.stringify(nodes || []))
+    },
+
+    // _sortNodeFilterTreeBySearch: function (nodes, query) {
+    //   var normalizedQuery = String(query || "").toLowerCase()
+
+    //   function nodeMatches(node) {
+    //     return String(node.text || "").toLowerCase().indexOf(normalizedQuery) !== -1
+    //   }
+
+    //   function prepareNode(node) {
+    //     var children = node.children || []
+    //     var preparedChildren = children.map(prepareNode)
+
+    //     preparedChildren.sort(function (firstNode, secondNode) {
+    //       if (firstNode._searchRank !== secondNode._searchRank) {
+    //         return firstNode._searchRank - secondNode._searchRank
+    //       }
+
+    //       return String(firstNode.text || "").localeCompare(String(secondNode.text || ""))
+    //     })
+
+    //     node.children = preparedChildren
+
+    //     if (nodeMatches(node)) {
+    //       node._searchRank = 0
+    //     } else if (preparedChildren.some(function (child) {
+    //       return child._searchRank < 2
+    //     })) {
+    //       node._searchRank = 1
+    //     } else {
+    //       node._searchRank = 2
+    //     }
+
+    //     return node
+    //   }
+
+    //   nodes = nodes.map(prepareNode)
+
+    //   nodes.sort(function (firstNode, secondNode) {
+    //     if (firstNode._searchRank !== secondNode._searchRank) {
+    //       return firstNode._searchRank - secondNode._searchRank
+    //     }
+
+    //     return String(firstNode.text || "").localeCompare(String(secondNode.text || ""))
+    //   })
+
+    //   function cleanNode(node) {
+    //     delete node._searchRank
+
+    //       ; (node.children || []).forEach(cleanNode)
+    //   }
+
+    //   nodes.forEach(cleanNode)
+
+    //   return nodes
+    // },
 
     _syncNodeTreeSelection: function () {
       var tree = this.byId("nodeFilterTree")
@@ -526,7 +709,7 @@ sap.ui.define([
         }.bind(this))
 
         this._prepareAreaCardTemplates(this._allNodes)
-        this._recreateChart(this._allNodes, OrgChart.match.boundary)
+        this._recreateChart(this._allNodes, 0.35)
 
         return
       }
@@ -540,7 +723,7 @@ sap.ui.define([
       }.bind(this))
 
       this._prepareAreaCardTemplates(filteredNodes)
-      this._recreateChart(filteredNodes, 0.65)
+      this._recreateChart(filteredNodes, 0.35)
     },
 
     onApplyFilters: function () {
@@ -901,24 +1084,37 @@ sap.ui.define([
         return ""
       }
 
-      return "https://teams.microsoft.com/l/chat/0/0?users=" + encodeURIComponent(email)
+      return "msteams://teams.microsoft.com/l/chat/0/0?users=" + encodeURIComponent(email)
+    },
+
+
+    _getDefaultAvatarImage: function () {
+      var svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">' +
+        '<circle cx="60" cy="60" r="60" fill="#edf4ff"/>' +
+        '<circle cx="60" cy="44" r="22" fill="#7fa7d6"/>' +
+        '<path d="M24 104c5-26 22-40 36-40s31 14 36 40" fill="#7fa7d6"/>' +
+        '</svg>'
+
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg)
     },
 
     _normalizePhoto: function (photoValue) {
-      if (!photoValue) {
-        return ""
+      var value = String(photoValue || "").trim()
+
+      if (!value) {
+        return this._getDefaultAvatarImage()
       }
 
       if (
-        photoValue.indexOf("http://") === 0 ||
-        photoValue.indexOf("https://") === 0 ||
-        photoValue.indexOf("data:image") === 0 ||
-        photoValue.indexOf("sap-icon://") === 0
+        value.indexOf("http://") === 0 ||
+        value.indexOf("https://") === 0 ||
+        value.indexOf("data:image") === 0
       ) {
-        return photoValue
+        return value
       }
 
-      return "data:image/jpeg;base64," + photoValue
+      return "data:image/jpeg;base64," + value
     },
 
     _sanitizeText: function (value) {
@@ -1731,7 +1927,6 @@ sap.ui.define([
         setTimeout(function () {
           this._renderEmployeeProfile(memberNode)
         }.bind(this), 50)
-
         event.preventDefault()
         event.stopPropagation()
         return false
@@ -1755,6 +1950,30 @@ sap.ui.define([
       }
 
       form.classList.add("hs-orgchart-popup")
+
+      var existingCloseButton = form.querySelector(".hs-orgchart-popup-close")
+
+      if (!existingCloseButton) {
+        var closeButton = document.createElement("button")
+        closeButton.type = "button"
+        closeButton.className = "hs-orgchart-popup-close"
+        closeButton.innerHTML = "×"
+        closeButton.setAttribute("aria-label", "Schließen")
+
+        closeButton.onclick = function (event) {
+          event.preventDefault()
+          event.stopPropagation()
+
+          if (this._chart && this._chart.editUI && this._chart.editUI.hide) {
+            this._chart.editUI.hide()
+            return
+          }
+
+          form.style.display = "none"
+        }.bind(this)
+
+        form.appendChild(closeButton)
+      }
 
       if (header) {
         header.classList.add("hs-orgchart-popup-header")
@@ -1782,10 +2001,6 @@ sap.ui.define([
       image.className = "hs-orgchart-profile-image"
       image.src = node.photo_url || ""
       image.alt = node.name || ""
-
-      if (!node.photo_url) {
-        image.style.display = "none"
-      }
 
       var identity = document.createElement("div")
       identity.className = "hs-orgchart-profile-identity"
@@ -1933,91 +2148,50 @@ sap.ui.define([
       fieldsContainer.appendChild(wrapper)
     },
 
-    onEmployeeSearchResultPress: function (event) {
-      var result = event.getSource().getBindingContext("searchModel").getObject()
+    // _centerAndZoomNode: function (nodeId) {
+    //   if (!this._chart || !nodeId) {
+    //     return
+    //   }
 
-      if (!result || !result.original_node_id) {
+    //   setTimeout(function () {
+    //     if (this._chart.center) {
+    //       this._chart.center(nodeId)
+    //     }
+    //   }.bind(this), 250)
+    // },
+
+    onEmployeeSearchLiveChange: function (event) {
+      var value = event.getParameter("value") || ""
+      var searchModel = this.getView().getModel("searchModel")
+
+      if (!searchModel) {
         return
       }
 
-      var employeeNode = this._profileNodeMap[result.original_node_id]
+      searchModel.setProperty("/query", value)
 
-      if (!employeeNode) {
+      if (!String(value).trim()) {
+        searchModel.setProperty("/results", [])
+        searchModel.setProperty("/visible", false)
         return
       }
 
-      this.getView().getModel("searchModel").setProperty("/visible", false)
-
-      var visibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
-
-      if (visibleNodeId && this._chart) {
-        this._recreateChart(this._allNodes, 0.4)
-
-        setTimeout(function () {
-          var refreshedVisibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
-
-          if (refreshedVisibleNodeId && this._chart && this._chart.center) {
-            this._chart.center(refreshedVisibleNodeId)
-          }
-
-          setTimeout(function () {
-            if (refreshedVisibleNodeId && this._chart) {
-              this._chart.editUI.show(refreshedVisibleNodeId)
-            }
-
-            setTimeout(function () {
-              this._renderEmployeeProfile(employeeNode)
-            }.bind(this), 80)
-          }.bind(this), 250)
-        }.bind(this), 120)
-
-        return
-      }
-
-      this._renderEmployeeProfile(employeeNode)
+      this._updateEmployeeSearchResults(value)
     },
 
-    _centerAndZoomNode: function (nodeId) {
-      if (!this._chart || !nodeId) {
-        return
-      }
-
-      setTimeout(function () {
-        if (this._chart.center) {
-          this._chart.center(nodeId)
-        }
-      }.bind(this), 250)
-    },
-
-    _findNearestDepartmentForEmployee: function (employeeId) {
-      var node = this._profileNodeMap ? this._profileNodeMap[employeeId] : null
-      var safetyCounter = 0
-
-      while (node && safetyCounter < 50) {
-        if (node.node_type === "O" && node.id !== "ROOT_MANAGEMENT") {
-          return node.id
-        }
-
-        if (!node.pid) {
-          return ""
-        }
-
-        node = this._profileNodeMap[node.pid]
-        safetyCounter++
-      }
-
-      return ""
-    },
-
-    onEmployeeSearch: function (event) {
-      var query = event.getParameter("newValue") || event.getParameter("query") || ""
-      var normalizedQuery = String(query).toLowerCase().trim()
+    _updateEmployeeSearchResults: function (query) {
+      var normalizedQuery = String(query || "").toLowerCase().trim()
       var results = []
       var seen = {}
+      var searchModel = this.getView().getModel("searchModel")
+
+      if (!searchModel) {
+        return
+      }
 
       if (!normalizedQuery) {
-        this.getView().getModel("searchModel").setProperty("/results", [])
-        this.getView().getModel("searchModel").setProperty("/visible", false)
+        searchModel.setProperty("/results", [])
+        searchModel.setProperty("/visible", false)
         return
       }
 
@@ -2075,115 +2249,87 @@ sap.ui.define([
         })
       }.bind(this))
 
-      this.getView().getModel("searchModel").setProperty("/results", results)
-      this.getView().getModel("searchModel").setProperty("/visible", results.length > 0)
+      searchModel.setProperty("/results", results)
+      searchModel.setProperty("/visible", results.length > 0)
     },
 
-    _getNodeNameById: function (nodeId) {
-      var node = this._profileNodeMap ? this._profileNodeMap[nodeId] : null
-
-      if (!node) {
-        return ""
-      }
-
-      return node.name || node.id || ""
-    },
-
-    onEmployeeSearchClear: function () {
+    onEmployeeSearch: function (event) {
+      var query = event.getParameter("suggestValue") || event.getParameter("newValue") || event.getParameter("query") || ""
       var searchModel = this.getView().getModel("searchModel")
 
-      searchModel.setProperty("/query", "")
-      searchModel.setProperty("/results", [])
-      searchModel.setProperty("/visible", false)
+      if (searchModel) {
+        searchModel.setProperty("/query", query)
+      }
+
+      this._updateEmployeeSearchResults(query)
     },
 
+    onEmployeeSuggestionSelected: function (event) {
+      var item = event.getParameter("selectedItem")
+      var employeeSearch = this.byId("employeeSearch")
+      var searchModel = this.getView().getModel("searchModel")
 
-    // _focusEmployeeInChart: function (visibleNodeId, employeeId) {
-    //   if (!this._chart || !visibleNodeId) {
-    //     return
-    //   }
-
-    //   if (this._chart.center) {
-    //     this._chart.center(visibleNodeId)
-    //   }
-
-    //   setTimeout(function () {
-    //     if (this._chart.zoom) {
-    //       this._chart.zoom(1.6)
-    //     }
-    //   }.bind(this), 120)
-
-    //   setTimeout(function () {
-    //     this._centerSvgElementByMemberId(employeeId)
-    //   }.bind(this), 350)
-
-    //   setTimeout(function () {
-    //     this._centerSvgElementByMemberId(employeeId)
-    //   }.bind(this), 650)
-    // },
-
-    // _centerSvgElementByMemberId: function (employeeId) {
-    //   if (!employeeId) {
-    //     return
-    //   }
-
-    //   var chartHost = document.getElementById("tree")
-
-    //   if (!chartHost) {
-    //     return
-    //   }
-
-    //   var targetElement = chartHost.querySelector('[data-member-id="' + employeeId + '"]')
-
-    //   if (!targetElement) {
-    //     return
-    //   }
-
-    //   var targetRect = targetElement.getBoundingClientRect()
-    //   var hostRect = chartHost.getBoundingClientRect()
-
-    //   var targetCenterX = targetRect.left + targetRect.width / 2
-    //   var targetCenterY = targetRect.top + targetRect.height / 2
-    //   var hostCenterX = hostRect.left + hostRect.width / 2
-    //   var hostCenterY = hostRect.top + hostRect.height / 2
-
-    //   var deltaX = hostCenterX - targetCenterX
-    //   var deltaY = hostCenterY - targetCenterY
-
-    //   this._moveChartViewport(deltaX, deltaY)
-    // },
-
-    _moveChartViewport: function (deltaX, deltaY) {
-      if (!this._chart) {
+      if (!item) {
         return
       }
 
-      if (this._chart.move) {
-        this._chart.move(deltaX, deltaY)
+      var employeeNode = this._profileNodeMap[item.getKey()]
+
+      if (!employeeNode) {
         return
       }
 
-      var chartHost = document.getElementById("tree")
-      var svg = chartHost ? chartHost.querySelector("svg") : null
-      var movableGroup = svg ? svg.querySelector("g") : null
+      var selectedEmployeeName = employeeNode.name || ""
 
-      if (!movableGroup) {
+      if (searchModel) {
+        searchModel.setProperty("/query", selectedEmployeeName)
+        searchModel.setProperty("/results", [])
+        searchModel.setProperty("/visible", false)
+      }
+
+      if (employeeSearch) {
+        employeeSearch.setValue(selectedEmployeeName)
+      }
+
+      setTimeout(function () {
+        if (searchModel) {
+          searchModel.setProperty("/query", selectedEmployeeName)
+          searchModel.setProperty("/results", [])
+          searchModel.setProperty("/visible", false)
+        }
+
+        if (employeeSearch) {
+          employeeSearch.setValue(selectedEmployeeName)
+        }
+      }, 0)
+
+      var visibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
+
+      if (visibleNodeId && this._chart) {
+        this._recreateChart(this._allNodes, 0.35)
+
+        setTimeout(function () {
+          var refreshedVisibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
+
+          if (refreshedVisibleNodeId && this._chart && this._chart.center) {
+            this._chart.center(refreshedVisibleNodeId)
+          }
+
+          setTimeout(function () {
+            if (refreshedVisibleNodeId && this._chart) {
+              this._chart.editUI.show(refreshedVisibleNodeId)
+            }
+
+            setTimeout(function () {
+              this._renderEmployeeProfile(employeeNode)
+            }.bind(this), 80)
+          }.bind(this), 250)
+        }.bind(this), 120)
+
         return
       }
 
-      var transform = movableGroup.getAttribute("transform") || ""
-      var match = transform.match(/translate\((-?\d+\.?\d*)[ ,](-?\d+\.?\d*)\)/)
-
-      if (!match) {
-        return
-      }
-
-      var currentX = parseFloat(match[1])
-      var currentY = parseFloat(match[2])
-      var newX = currentX + deltaX
-      var newY = currentY + deltaY
-
-      movableGroup.setAttribute("transform", transform.replace(/translate\((-?\d+\.?\d*)[ ,](-?\d+\.?\d*)\)/, "translate(" + newX + " " + newY + ")"))
+      this._renderEmployeeProfile(employeeNode)
     },
 
     _findVisibleNodeForEmployee: function (employeeNode) {
@@ -2242,6 +2388,6 @@ sap.ui.define([
       }
 
       return "mailto:" + email
-    },
+    }
   })
 })

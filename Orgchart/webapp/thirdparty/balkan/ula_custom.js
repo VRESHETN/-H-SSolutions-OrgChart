@@ -1,3 +1,21 @@
+var HS_PERSON_CARD_WIDTH = 434
+var HS_PERSON_CARD_HEIGHT = 122
+
+var HS_PERSON_SIDE_PADDING = 18
+var HS_PERSON_BUTTON_GAP = 20
+var HS_PERSON_BUTTON_HEIGHT = 34
+var HS_PERSON_BUTTON_WIDTH = (HS_PERSON_CARD_WIDTH - HS_PERSON_SIDE_PADDING * 2 - HS_PERSON_BUTTON_GAP) / 2
+
+var HS_AVATAR_X = 42
+var HS_AVATAR_Y = 38
+var HS_AVATAR_SIZE = 56
+var HS_AVATAR_RADIUS = 28
+
+var HS_TEXT_X = 104
+var HS_NAME_Y = 32
+var HS_TITLE_Y = 56
+var HS_BUTTON_Y = 78
+
 OrgChart.templates.ula_custom_emp = Object.assign({}, OrgChart.templates.ula)
 OrgChart.templates.ula_custom_emp.size = [340, 197]
 
@@ -138,17 +156,15 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   var templateName = "ula_custom_team_" + String(memberCount)
   var topConnectorHeight = 12
   var headerHeight = 96
-  var rowHeight = 138
-  var footer = 18
-  var imageSize = 56
-  var imageRadius = 28
+  var rowHeight = HS_PERSON_CARD_HEIGHT + 24
+  var teamSidePadding = 24
   var maxColumnCount = 2
   var oneColumnLimit = 3
-  var columnWidth = 430
+  var columnWidth = HS_PERSON_CARD_WIDTH + teamSidePadding * 2
   var columnCount = memberCount <= oneColumnLimit ? 1 : Math.min(maxColumnCount, memberCount)
   var rowsPerColumn = Math.ceil(memberCount / columnCount)
   var width = columnWidth * columnCount
-  var height = topConnectorHeight + headerHeight + rowsPerColumn * rowHeight + footer
+  var height = topConnectorHeight + headerHeight + rowsPerColumn * rowHeight
   var centerX = width / 2
   var contentY = topConnectorHeight
   var headerTextWidth = width - 60
@@ -162,11 +178,11 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     var clipColumnIndex = Math.floor(clipIndex / rowsPerColumn)
     var clipRowIndex = clipIndex % rowsPerColumn
     var clipXOffset = clipColumnIndex * columnWidth
-    var clipY = contentY + headerHeight + clipRowIndex * rowHeight + 14
+    var clipY = contentY + headerHeight + clipRowIndex * rowHeight
 
     defs +=
       '<clipPath id="' + templateName + '_circle_' + clipIndex + '">' +
-      '<circle cx="' + (clipXOffset + 60) + '" cy="' + (clipY + imageRadius) + '" r="' + imageRadius + '"></circle>' +
+      '<circle cx="' + (clipXOffset + teamSidePadding + HS_AVATAR_X) + '" cy="' + (clipY + HS_AVATAR_Y) + '" r="' + HS_AVATAR_RADIUS + '"></circle>' +
       '</clipPath>'
   }
 
@@ -185,21 +201,22 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     var rowIndex = row % rowsPerColumn
     var xOffset = columnIndex * columnWidth
     var y = contentY + headerHeight + rowIndex * rowHeight
+    var cardX = xOffset + teamSidePadding
+    var buttonLeftX = cardX + HS_PERSON_SIDE_PADDING
+    var buttonRightX = buttonLeftX + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP
+    var buttonY = y + HS_BUTTON_Y
 
     node +=
-      '<rect x="' + (xOffset + 12) + '" y="' + (y - 6) + '" width="406" height="140" rx="20" ry="20" fill="#d8eaff" opacity="0.55"></rect>' +
-      '<rect x="' + (xOffset + 18) + '" y="' + y + '" width="394" height="128" rx="16" ry="16" fill="#ffffff" stroke="#0a6ed1" stroke-width="3"></rect>' +
-      '<circle cx="' + (xOffset + 60) + '" cy="' + (y + 42) + '" r="30" fill="#eaf4ff" stroke="#0a6ed1" stroke-width="2.6"></circle>'
-
-    node +=
-      '<rect x="' + (xOffset + 30) + '" y="' + (y + 82) + '" width="162" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
-      '<circle cx="' + (xOffset + 58) + '" cy="' + (y + 99) + '" r="8" fill="#0a6ed1"></circle>' +
-      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (xOffset + 58) + '" y="' + (y + 103) + '" text-anchor="middle">T</text>' +
-      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (xOffset + 112) + '" y="' + (y + 104) + '" text-anchor="middle">Teams</text>' +
-      '<rect x="' + (xOffset + 212) + '" y="' + (y + 82) + '" width="162" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
-      '<rect x="' + (xOffset + 240) + '" y="' + (y + 92) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
-      '<path d="M' + (xOffset + 242) + ' ' + (y + 94) + ' L' + (xOffset + 248) + ' ' + (y + 99) + ' L' + (xOffset + 254) + ' ' + (y + 94) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
-      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (xOffset + 312) + '" y="' + (y + 104) + '" text-anchor="middle">Outlook</text>'
+      '<rect x="' + cardX + '" y="' + y + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + HS_PERSON_CARD_HEIGHT + '" rx="16" ry="16" fill="#ffffff" stroke="#0a6ed1" stroke-width="3"></rect>' +
+      '<circle cx="' + (cardX + HS_AVATAR_X) + '" cy="' + (y + HS_AVATAR_Y) + '" r="30" fill="#eaf4ff" stroke="#0a6ed1" stroke-width="2.6"></circle>' +
+      '<rect x="' + buttonLeftX + '" y="' + buttonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+      '<circle cx="' + (buttonLeftX + 30) + '" cy="' + (buttonY + 17) + '" r="8" fill="#0a6ed1"></circle>' +
+      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (buttonLeftX + 30) + '" y="' + (buttonY + 21) + '" text-anchor="middle">T</text>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (buttonLeftX + HS_PERSON_BUTTON_WIDTH / 2 + 18) + '" y="' + (buttonY + 22) + '" text-anchor="middle">Teams</text>' +
+      '<rect x="' + buttonRightX + '" y="' + buttonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+      '<rect x="' + (buttonRightX + 30) + '" y="' + (buttonY + 11) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+      '<path d="M' + (buttonRightX + 32) + ' ' + (buttonY + 13) + ' L' + (buttonRightX + 38) + ' ' + (buttonY + 18) + ' L' + (buttonRightX + 44) + ' ' + (buttonY + 13) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (buttonRightX + HS_PERSON_BUTTON_WIDTH / 2 + 18) + '" y="' + (buttonY + 22) + '" text-anchor="middle">Outlook</text>'
   }
 
   node += '</g>'
@@ -215,26 +232,26 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   OrgChart.templates[templateName].img_0 = ''
 
   OrgChart.templates[templateName].img_1 =
-    '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_circle_0)" xlink:href="{val}" x="32" y="' + (contentY + 110) + '" width="' + imageSize + '" height="' + imageSize + '"></image>'
+    '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_circle_0)" xlink:href="{val}" x="' + (teamSidePadding + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (contentY + headerHeight + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'
 
   OrgChart.templates[templateName].field_6 =
-    '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="104" y="' + (contentY + 132) + '">{val}</text>'
+    '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (teamSidePadding + HS_TEXT_X) + '" y="' + (contentY + headerHeight + HS_NAME_Y) + '">{val}</text>'
 
   OrgChart.templates[templateName].field_7 =
-    '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="104" y="' + (contentY + 154) + '">{val}</text>'
+    '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (teamSidePadding + HS_TEXT_X) + '" y="' + (contentY + headerHeight + HS_TITLE_Y) + '">{val}</text>'
 
   OrgChart.templates[templateName].field_8 =
     '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-    '<rect x="30" y="' + (contentY + 178) + '" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '<rect x="' + (teamSidePadding + HS_PERSON_SIDE_PADDING) + '" y="' + (contentY + headerHeight + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
     '</a>'
 
   OrgChart.templates[templateName].field_9 =
     '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-    '<rect x="212" y="' + (contentY + 178) + '" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '<rect x="' + (teamSidePadding + HS_PERSON_SIDE_PADDING + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP) + '" y="' + (contentY + headerHeight + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
     '</a>'
 
   OrgChart.templates[templateName].field_10 =
-    '<rect class="hs-team-member-click" data-member-id="{val}" x="18" y="' + (contentY + 96) + '" width="394" height="78" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    '<rect class="hs-team-member-click" data-member-id="{val}" x="' + teamSidePadding + '" y="' + (contentY + headerHeight) + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + (HS_BUTTON_Y - 4) + '" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
 
   OrgChart.templates[templateName].field_11 = ''
   OrgChart.templates[templateName].field_12 = ''
@@ -249,28 +266,31 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     var memberRowIndex = index % rowsPerColumn
     var memberXOffset = memberColumnIndex * columnWidth
     var rowY = contentY + headerHeight + memberRowIndex * rowHeight
+    var memberCardX = memberXOffset + teamSidePadding
+    var memberButtonLeftX = memberCardX + HS_PERSON_SIDE_PADDING
+    var memberButtonRightX = memberButtonLeftX + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP
 
     OrgChart.templates[templateName]["img_" + imageIndex] =
-      '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_circle_' + index + ')" xlink:href="{val}" x="' + (memberXOffset + 32) + '" y="' + (rowY + 14) + '" width="' + imageSize + '" height="' + imageSize + '"></image>'
+      '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_circle_' + index + ')" xlink:href="{val}" x="' + (memberCardX + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (rowY + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'
 
     OrgChart.templates[templateName]["field_" + base] =
-      '<text data-width="238" data-text-overflow="ellipsis" style="font-size:15px;font-weight:800;" fill="#102a43" x="' + (memberXOffset + 104) + '" y="' + (rowY + 36) + '">{val}</text>'
+      '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:800;" fill="#102a43" x="' + (memberCardX + HS_TEXT_X) + '" y="' + (rowY + HS_NAME_Y) + '">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 1)] =
-      '<text data-width="238" data-text-overflow="ellipsis" style="font-size:11px;font-weight:600;" fill="#0a6ed1" x="' + (memberXOffset + 104) + '" y="' + (rowY + 58) + '">{val}</text>'
+      '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:600;" fill="#0a6ed1" x="' + (memberCardX + HS_TEXT_X) + '" y="' + (rowY + HS_TITLE_Y) + '">{val}</text>'
 
     OrgChart.templates[templateName]["field_" + (base + 2)] =
       '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-      '<rect x="' + (memberXOffset + 30) + '" y="' + (rowY + 82) + '" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+      '<rect x="' + memberButtonLeftX + '" y="' + (rowY + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
       '</a>'
 
     OrgChart.templates[templateName]["field_" + (base + 3)] =
       '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-      '<rect x="' + (memberXOffset + 212) + '" y="' + (rowY + 82) + '" width="162" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+      '<rect x="' + memberButtonRightX + '" y="' + (rowY + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
       '</a>'
 
     OrgChart.templates[templateName]["field_" + (base + 4)] =
-      '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (memberXOffset + 18) + '" y="' + rowY + '" width="394" height="78" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+      '<rect class="hs-team-member-click" data-member-id="{val}" x="' + memberCardX + '" y="' + rowY + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + (HS_BUTTON_Y - 4) + '" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
 
     OrgChart.templates[templateName]["field_" + (base + 5)] = ''
     OrgChart.templates[templateName]["field_" + (base + 6)] = ''
@@ -280,7 +300,6 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
     '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
     '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
 }
-
 
 OrgChart.templates.ula_custom_empty_team = Object.assign({}, OrgChart.templates.ula)
 OrgChart.templates.ula_custom_empty_team.size = [430, 108]
@@ -334,10 +353,12 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
   var templateName = "ula_custom_area_card_" + String(areaIndex)
   var outerPadding = 52
   var cardWidth = 470
+  var personCardWidth = HS_PERSON_CARD_WIDTH
+  var personCardHeight = HS_PERSON_CARD_HEIGHT
   var cardGap = 52
   var subtreeGap = 64
   var layout = layoutJson ? JSON.parse(layoutJson) : { roots: [], cards: [] }
-
+  var centerX = areaWidth / 2
 
 
   var hideRootConnector = !!layout.hideRootConnector
@@ -347,13 +368,19 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
   var areaHeaderHeight = hideOuterFrame && hideRootConnector && hideAreaTitle && hideHeaderLeader ? 24 : hideAreaTitle ? (hideHeaderLeader ? 72 : 222) : (hideHeaderLeader ? 130 : 280)
   if (layout.managementOnly) {
     OrgChart.templates[templateName] = Object.assign({}, OrgChart.templates.ula)
-    OrgChart.templates[templateName].size = [areaWidth, areaHeight]
 
-    var managementPersonWidth = 434
-    var managementPersonGap = 36
-    var managementOuterPadding = 52
+    var managementPersonGap = 24
+    var managementOuterPadding = 64
     var managementPersonY = 120
     var managementEmployeeCount = layout.employeeCount || 0
+    var managementRequiredWidth = managementOuterPadding * 2 + managementEmployeeCount * HS_PERSON_CARD_WIDTH + Math.max(0, managementEmployeeCount - 1) * managementPersonGap
+
+    if (managementRequiredWidth > areaWidth) {
+      areaWidth = managementRequiredWidth
+      centerX = areaWidth / 2
+    }
+
+    OrgChart.templates[templateName].size = [areaWidth, areaHeight]
 
     OrgChart.templates[templateName].defs =
       '<filter id="' + templateName + '_shadow" x="-20%" y="-20%" width="160%" height="160%">' +
@@ -366,25 +393,28 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
       '<rect x="' + (centerX - 210) + '" y="0" width="420" height="56" rx="12" ry="12" fill="#0a6ed1"></rect>'
 
     for (var managementIndex = 1; managementIndex <= managementEmployeeCount; managementIndex++) {
-      var personX = managementOuterPadding + (managementIndex - 1) * (managementPersonWidth + managementPersonGap)
+      var personX = managementOuterPadding + (managementIndex - 1) * (HS_PERSON_CARD_WIDTH + managementPersonGap)
       var personY = managementPersonY
+      var managementButtonLeftX = personX + HS_PERSON_SIDE_PADDING
+      var managementButtonRightX = managementButtonLeftX + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP
+      var managementButtonY = personY + HS_BUTTON_Y
 
       OrgChart.templates[templateName].defs +=
         '<clipPath id="' + templateName + '_management_emp_' + managementIndex + '_circle">' +
-        '<circle cx="' + (personX + 42) + '" cy="' + (personY + 34) + '" r="28"></circle>' +
+        '<circle cx="' + (personX + HS_AVATAR_X) + '" cy="' + (personY + HS_AVATAR_Y) + '" r="' + HS_AVATAR_RADIUS + '"></circle>' +
         '</clipPath>'
 
       managementNode +=
-        '<rect x="' + personX + '" y="' + personY + '" width="' + managementPersonWidth + '" height="112" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
-        '<circle cx="' + (personX + 42) + '" cy="' + (personY + 34) + '" r="28" fill="#edf4ff"></circle>' +
-        '<rect x="' + (personX + 12) + '" y="' + (personY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
-        '<circle cx="' + (personX + 42) + '" cy="' + (personY + 85) + '" r="8" fill="#0a6ed1"></circle>' +
-        '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (personX + 42) + '" y="' + (personY + 89) + '" text-anchor="middle">T</text>' +
-        '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (personX + 104) + '" y="' + (personY + 90) + '" text-anchor="middle">Teams</text>' +
-        '<rect x="' + (personX + 212) + '" y="' + (personY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
-        '<rect x="' + (personX + 242) + '" y="' + (personY + 79) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
-        '<path d="M' + (personX + 244) + ' ' + (personY + 81) + ' L' + (personX + 250) + ' ' + (personY + 86) + ' L' + (personX + 256) + ' ' + (personY + 81) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
-        '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (personX + 312) + '" y="' + (personY + 90) + '" text-anchor="middle">Outlook</text>'
+        '<rect x="' + personX + '" y="' + personY + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + HS_PERSON_CARD_HEIGHT + '" rx="16" ry="16" fill="#ffffff" stroke="#d7e0ea" stroke-width="1.2"></rect>' +
+        '<circle cx="' + (personX + HS_AVATAR_X) + '" cy="' + (personY + HS_AVATAR_Y) + '" r="' + HS_AVATAR_RADIUS + '" fill="#edf4ff"></circle>' +
+        '<rect x="' + managementButtonLeftX + '" y="' + managementButtonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+        '<circle cx="' + (managementButtonLeftX + 30) + '" cy="' + (managementButtonY + 17) + '" r="8" fill="#0a6ed1"></circle>' +
+        '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (managementButtonLeftX + 30) + '" y="' + (managementButtonY + 21) + '" text-anchor="middle">T</text>' +
+        '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (managementButtonLeftX + HS_PERSON_BUTTON_WIDTH / 2 + 18) + '" y="' + (managementButtonY + 22) + '" text-anchor="middle">Teams</text>' +
+        '<rect x="' + managementButtonRightX + '" y="' + managementButtonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+        '<rect x="' + (managementButtonRightX + 30) + '" y="' + (managementButtonY + 11) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+        '<path d="M' + (managementButtonRightX + 32) + ' ' + (managementButtonY + 13) + ' L' + (managementButtonRightX + 38) + ' ' + (managementButtonY + 18) + ' L' + (managementButtonRightX + 44) + ' ' + (managementButtonY + 13) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+        '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (managementButtonRightX + HS_PERSON_BUTTON_WIDTH / 2 + 18) + '" y="' + (managementButtonY + 22) + '" text-anchor="middle">Outlook</text>'
     }
 
     managementNode += '</g>'
@@ -398,30 +428,32 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
       var fieldBase = 200
       var employeeBase = fieldBase + 10 + (employeeIndex - 1) * 5
       var fieldImageBase = 100
-      var personFieldX = managementOuterPadding + (employeeIndex - 1) * (managementPersonWidth + managementPersonGap)
+      var personFieldX = managementOuterPadding + (employeeIndex - 1) * (HS_PERSON_CARD_WIDTH + managementPersonGap)
       var personFieldY = managementPersonY
+      var personButtonLeftX = personFieldX + HS_PERSON_SIDE_PADDING
+      var personButtonRightX = personButtonLeftX + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP
 
       OrgChart.templates[templateName]["img_" + (fieldImageBase + employeeIndex)] =
-        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_management_emp_' + employeeIndex + '_circle)" xlink:href="{val}" x="' + (personFieldX + 14) + '" y="' + (personFieldY + 6) + '" width="56" height="56"></image>'
+        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_management_emp_' + employeeIndex + '_circle)" xlink:href="{val}" x="' + (personFieldX + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (personFieldY + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'
 
       OrgChart.templates[templateName]["field_" + employeeBase] =
-        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (personFieldX + 82) + '" y="' + (personFieldY + 28) + '">{val}</text>'
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (personFieldX + HS_TEXT_X) + '" y="' + (personFieldY + HS_NAME_Y) + '">{val}</text>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 1)] =
-        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (personFieldX + 82) + '" y="' + (personFieldY + 50) + '">{val}</text>'
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (personFieldX + HS_TEXT_X) + '" y="' + (personFieldY + HS_TITLE_Y) + '">{val}</text>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 2)] =
         '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-        '<rect x="' + (personFieldX + 12) + '" y="' + (personFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '<rect x="' + personButtonLeftX + '" y="' + (personFieldY + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
         '</a>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 3)] =
         '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-        '<rect x="' + (personFieldX + 212) + '" y="' + (personFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '<rect x="' + personButtonRightX + '" y="' + (personFieldY + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
         '</a>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 4)] =
-        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + personFieldX + '" y="' + personFieldY + '" width="' + managementPersonWidth + '" height="68" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + personFieldX + '" y="' + personFieldY + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + (HS_BUTTON_Y - 4) + '" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
     }
 
     OrgChart.templates[templateName].link =
@@ -430,12 +462,13 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
 
     return
   }
+
+
   var cardHeaderHeight = 82
-  var leaderHeight = 142
-  var employeeHeight = 126
-  var cardBottomPadding = 24
+  var leaderHeight = HS_PERSON_CARD_HEIGHT + 22
+  var employeeHeight = HS_PERSON_CARD_HEIGHT + 8
+  var cardBottomPadding = 8
   var rowGap = 70
-  var centerX = areaWidth / 2
   var topRowY = areaHeaderHeight
   var cardMetaMap = {}
   var positions = {}
@@ -495,7 +528,7 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
     '<feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#1f2937" flood-opacity="0.12"></feDropShadow>' +
     '</filter>' +
     '<clipPath id="' + templateName + '_leader_circle">' +
-    '<circle cx="' + (centerX - 165) + '" cy="126" r="32"></circle>' +
+    '<circle cx="' + (centerX - HS_PERSON_CARD_WIDTH / 2 + HS_AVATAR_X) + '" cy="' + (82 + HS_AVATAR_Y) + '" r="' + HS_AVATAR_RADIUS + '"></circle>' +
     '</clipPath>'
 
   var node = '<g>'
@@ -510,24 +543,14 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
       '<rect x="' + (centerX - 210) + '" y="0" width="420" height="56" rx="12" ry="12" fill="#0a6ed1"></rect>'
   }
   if (!hideHeaderLeader) {
+    var headerPersonX = centerX - HS_PERSON_CARD_WIDTH / 2
+    var headerPersonY = 82
+
     node +=
       '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + centerX + ' 56 L' + centerX + ' 82"></path>' +
       '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + centerX + ' 56 L' + centerX + ' 82"></path>' +
-      '<rect x="' + (centerX - 220) + '" y="82" width="440" height="132" rx="18" ry="18" fill="#ffffff" stroke="#0a6ed1" stroke-width="3" filter="url(#' + templateName + '_shadow)"></rect>' +
-      '<rect x="' + (centerX - 208) + '" y="94" width="416" height="108" rx="14" ry="14" fill="#ffffff" stroke="#e7eef5" stroke-width="1"></rect>' +
-      '<circle cx="' + (centerX - 165) + '" cy="126" r="32" fill="#edf4ff"></circle>' +
-      '<rect x="' + (centerX + 120) + '" y="104" width="78" height="24" rx="12" ry="12" fill="#eaf4ff" stroke="#b8dcff" stroke-width="1"></rect>' +
-      '<text style="font-size:10px;font-weight:800;letter-spacing:0.4px;" fill="#0a6ed1" x="' + (centerX + 159) + '" y="120" text-anchor="middle">LEITUNG</text>' +
-      '<rect x="' + (centerX - 145) + '" y="160" width="130" height="34" rx="10" ry="10" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
-      '<circle cx="' + (centerX - 118) + '" cy="177" r="8" fill="#0a6ed1"></circle>' +
-      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (centerX - 118) + '" y="181" text-anchor="middle">T</text>' +
-      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (centerX - 78) + '" y="181" text-anchor="middle">Teams</text>' +
-      '<rect x="' + (centerX - 5) + '" y="160" width="150" height="34" rx="10" ry="10" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
-      '<rect x="' + (centerX + 22) + '" y="170" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
-      '<path d="M' + (centerX + 24) + ' 172 L' + (centerX + 30) + ' 177 L' + (centerX + 36) + ' 172" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
-      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (centerX + 82) + '" y="181" text-anchor="middle">Outlook</text>'
+      drawPersonCard(headerPersonX, headerPersonY, true)
   }
-
   var rootConnectorY = 0
 
   if ((layout.roots || []).length && !hideRootConnector) {
@@ -546,8 +569,12 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
       '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" d="M' + firstRootCenterX + ' ' + rootConnectorY + ' L' + lastRootCenterX + ' ' + rootConnectorY + '"></path>' +
       '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" d="M' + firstRootCenterX + ' ' + rootConnectorY + ' L' + lastRootCenterX + ' ' + rootConnectorY + '"></path>'
   }
+
   function drawPersonCard(x, y, isLeader) {
     var badge = ''
+    var buttonLeftX = x + HS_PERSON_SIDE_PADDING
+    var buttonRightX = buttonLeftX + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP
+    var buttonY = y + HS_BUTTON_Y
 
     if (isLeader) {
       badge =
@@ -556,17 +583,19 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
     }
 
     return '' +
-      '<rect x="' + x + '" y="' + y + '" width="' + (cardWidth - 36) + '" height="112" rx="16" ry="16" fill="#ffffff" stroke="' + (isLeader ? '#0a6ed1' : '#d7e0ea') + '" stroke-width="' + (isLeader ? '3' : '1.2') + '"></rect>' +
-      '<circle cx="' + (x + 42) + '" cy="' + (y + 34) + '" r="' + (isLeader ? '30' : '28') + '" fill="#edf4ff" stroke="' + (isLeader ? '#0a6ed1' : '#edf4ff') + '" stroke-width="' + (isLeader ? '2.6' : '1') + '"></circle>' +
+      '<rect x="' + x + '" y="' + y + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + HS_PERSON_CARD_HEIGHT + '" rx="16" ry="16" fill="#ffffff" stroke="' + (isLeader ? '#0a6ed1' : '#d7e0ea') + '" stroke-width="' + (isLeader ? '3' : '1.2') + '"></rect>' +
+      '<circle cx="' + (x + HS_AVATAR_X) + '" cy="' + (y + HS_AVATAR_Y) + '" r="' + (isLeader ? '30' : '28') + '" fill="#edf4ff" stroke="' + (isLeader ? '#0a6ed1' : '#edf4ff') + '" stroke-width="' + (isLeader ? '2.6' : '1') + '"></circle>' +
       badge +
-      '<rect x="' + (x + 12) + '" y="' + (y + 68) + '" width="176" height="34" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
-      '<circle cx="' + (x + 42) + '" cy="' + (y + 85) + '" r="8" fill="#0a6ed1"></circle>' +
-      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (x + 42) + '" y="' + (y + 89) + '" text-anchor="middle">T</text>' +
-      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (x + 104) + '" y="' + (y + 90) + '" text-anchor="middle">Teams</text>' +
-      '<rect x="' + (x + 212) + '" y="' + (y + 68) + '" width="176" height="34" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
-      '<rect x="' + (x + 242) + '" y="' + (y + 79) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
-      '<path d="M' + (x + 244) + ' ' + (y + 81) + ' L' + (x + 250) + ' ' + (y + 86) + ' L' + (x + 256) + ' ' + (y + 81) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
-      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (x + 312) + '" y="' + (y + 90) + '" text-anchor="middle">Outlook</text>'
+
+      '<rect x="' + buttonLeftX + '" y="' + buttonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#edf5ff" stroke="#cfe5ff" stroke-width="1"></rect>' +
+      '<circle cx="' + (buttonLeftX + 30) + '" cy="' + (buttonY + 17) + '" r="8" fill="#0a6ed1"></circle>' +
+      '<text style="font-size:10px;font-weight:800;" fill="#ffffff" x="' + (buttonLeftX + 30) + '" y="' + (buttonY + 21) + '" text-anchor="middle">T</text>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#0a6ed1" x="' + (buttonLeftX + HS_PERSON_BUTTON_WIDTH / 2 + 18) + '" y="' + (buttonY + 22) + '" text-anchor="middle">Teams</text>' +
+
+      '<rect x="' + buttonRightX + '" y="' + buttonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#f4f7fa" stroke="#dfe7ef" stroke-width="1"></rect>' +
+      '<rect x="' + (buttonRightX + 30) + '" y="' + (buttonY + 11) + '" width="16" height="13" rx="3" ry="3" fill="#334e68"></rect>' +
+      '<path d="M' + (buttonRightX + 32) + ' ' + (buttonY + 13) + ' L' + (buttonRightX + 38) + ' ' + (buttonY + 18) + ' L' + (buttonRightX + 44) + ' ' + (buttonY + 13) + '" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<text style="font-size:12px;font-weight:800;" fill="#334e68" x="' + (buttonRightX + HS_PERSON_BUTTON_WIDTH / 2 + 18) + '" y="' + (buttonY + 22) + '" text-anchor="middle">Outlook</text>'
   }
 
   function drawCardFrame(x, y, cardHeight, hideLeader) {
@@ -646,27 +675,33 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
     ? ''
     : '<text data-width="390" data-text-overflow="ellipsis" style="font-size:22px;font-weight:900;" fill="#ffffff" x="' + centerX + '" y="36" text-anchor="middle">{val}</text>'
 
+  var headerPersonX = centerX - HS_PERSON_CARD_WIDTH / 2
+  var headerPersonY = 82
+  var headerButtonLeftX = headerPersonX + HS_PERSON_SIDE_PADDING
+  var headerButtonRightX = headerButtonLeftX + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP
+  var headerButtonY = headerPersonY + HS_BUTTON_Y
+
   OrgChart.templates[templateName].img_1 =
-    '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_leader_circle)" xlink:href="{val}" x="' + (centerX - 197) + '" y="94" width="64" height="64"></image>'
+    '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_leader_circle)" xlink:href="{val}" x="' + (headerPersonX + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (headerPersonY + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'
 
   OrgChart.templates[templateName].field_6 =
-    '<text data-width="230" data-text-overflow="ellipsis" style="font-size:16px;font-weight:900;" fill="#102a43" x="' + (centerX - 110) + '" y="126">{val}</text>'
+    '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (headerPersonX + HS_TEXT_X) + '" y="' + (headerPersonY + HS_NAME_Y) + '">{val}</text>'
 
   OrgChart.templates[templateName].field_7 =
-    '<text data-width="230" data-text-overflow="ellipsis" style="font-size:13px;font-weight:700;" fill="#0a6ed1" x="' + (centerX - 110) + '" y="150">{val}</text>'
+    '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (headerPersonX + HS_TEXT_X) + '" y="' + (headerPersonY + HS_TITLE_Y) + '">{val}</text>'
 
   OrgChart.templates[templateName].field_8 =
     '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-    '<rect x="' + (centerX - 145) + '" y="160" width="130" height="34" rx="10" ry="10" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '<rect x="' + headerButtonLeftX + '" y="' + headerButtonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
     '</a>'
 
   OrgChart.templates[templateName].field_9 =
     '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-    '<rect x="' + (centerX - 5) + '" y="160" width="150" height="34" rx="10" ry="10" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+    '<rect x="' + headerButtonRightX + '" y="' + headerButtonY + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
     '</a>'
 
   OrgChart.templates[templateName].field_10 =
-    '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (centerX - 220) + '" y="82" width="440" height="132" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+    '<rect class="hs-team-member-click" data-member-id="{val}" x="' + headerPersonX + '" y="' + headerPersonY + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + (HS_BUTTON_Y - 4) + '" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
 
   for (var slot = 1; slot <= 12; slot++) {
     if (!positions[slot]) {
@@ -682,7 +717,7 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
 
     OrgChart.templates[templateName].defs +=
       '<clipPath id="' + templateName + '_card_' + slot + '_leader_circle">' +
-      '<circle cx="' + (fieldX + 60) + '" cy="' + (fieldY + 132) + '" r="30"></circle>' +
+      '<circle cx="' + (fieldX + 18 + HS_AVATAR_X) + '" cy="' + (fieldY + 98 + HS_AVATAR_Y) + '" r="' + HS_AVATAR_RADIUS + '"></circle>' +
       '</clipPath>'
 
     OrgChart.templates[templateName]["field_" + fieldBase] =
@@ -690,26 +725,26 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
 
     if (!fieldHideLeader) {
       OrgChart.templates[templateName]["img_" + fieldImageBase] =
-        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_leader_circle)" xlink:href="{val}" x="' + (fieldX + 30) + '" y="' + (fieldY + 102) + '" width="60" height="60"></image>'
+        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_leader_circle)" xlink:href="{val}" x="' + (fieldX + 18 + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (fieldY + 98 + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'
 
       OrgChart.templates[templateName]["field_" + (fieldBase + 1)] =
-        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (fieldX + 122) + '" y="' + (fieldY + 126) + '">{val}</text>'
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (fieldX + 18 + HS_TEXT_X) + '" y="' + (fieldY + 98 + HS_NAME_Y) + '">{val}</text>'
 
       OrgChart.templates[templateName]["field_" + (fieldBase + 2)] =
-        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (fieldX + 122) + '" y="' + (fieldY + 148) + '">{val}</text>'
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (fieldX + 18 + HS_TEXT_X) + '" y="' + (fieldY + 98 + HS_TITLE_Y) + '">{val}</text>'
 
       OrgChart.templates[templateName]["field_" + (fieldBase + 3)] =
         '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-        '<rect x="' + (fieldX + 30) + '" y="' + (fieldY + 166) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '<rect x="' + (fieldX + 18 + HS_PERSON_SIDE_PADDING) + '" y="' + (fieldY + 98 + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
         '</a>'
 
       OrgChart.templates[templateName]["field_" + (fieldBase + 4)] =
         '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-        '<rect x="' + (fieldX + 230) + '" y="' + (fieldY + 166) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '<rect x="' + (fieldX + 18 + HS_PERSON_SIDE_PADDING + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP) + '" y="' + (fieldY + 98 + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
         '</a>'
 
       OrgChart.templates[templateName]["field_" + (fieldBase + 5)] =
-        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (fieldX + 18) + '" y="' + (fieldY + 98) + '" width="' + (cardWidth - 36) + '" height="62" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (fieldX + 18) + '" y="' + (fieldY + 98) + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + (HS_BUTTON_Y - 4) + '" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
     } else {
 
       OrgChart.templates[templateName]["img_" + fieldImageBase] = ''
@@ -725,30 +760,30 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
 
       OrgChart.templates[templateName].defs +=
         '<clipPath id="' + templateName + '_card_' + slot + '_emp_' + employeeFieldIndex + '_circle">' +
-        '<circle cx="' + (fieldX + 60) + '" cy="' + (employeeFieldY + 34) + '" r="28"></circle>' +
+        '<circle cx="' + (fieldX + 18 + HS_AVATAR_X) + '" cy="' + (employeeFieldY + HS_AVATAR_Y) + '" r="' + HS_AVATAR_RADIUS + '"></circle>' +
         '</clipPath>'
 
       OrgChart.templates[templateName]["img_" + (fieldImageBase + employeeFieldIndex)] =
-        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_emp_' + employeeFieldIndex + '_circle)" xlink:href="{val}" x="' + (fieldX + 32) + '" y="' + (employeeFieldY + 6) + '" width="56" height="56"></image>'
+        '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_emp_' + employeeFieldIndex + '_circle)" xlink:href="{val}" x="' + (fieldX + 18 + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (employeeFieldY + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'
 
       OrgChart.templates[templateName]["field_" + employeeBase] =
-        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (fieldX + 122) + '" y="' + (employeeFieldY + 28) + '">{val}</text>'
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:15px;font-weight:900;" fill="#0b2341" x="' + (fieldX + 18 + HS_TEXT_X) + '" y="' + (employeeFieldY + HS_NAME_Y) + '">{val}</text>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 1)] =
-        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (fieldX + 122) + '" y="' + (employeeFieldY + 50) + '">{val}</text>'
+        '<text data-width="190" data-text-overflow="ellipsis" style="font-size:11px;font-weight:700;" fill="#0a6ed1" x="' + (fieldX + 18 + HS_TEXT_X) + '" y="' + (employeeFieldY + HS_TITLE_Y) + '">{val}</text>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 2)] =
         '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-        '<rect x="' + (fieldX + 30) + '" y="' + (employeeFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '<rect x="' + (fieldX + 18 + HS_PERSON_SIDE_PADDING) + '" y="' + (employeeFieldY + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
         '</a>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 3)] =
         '<a class="hs-card-action-link" xlink:href="{val}" target="_blank">' +
-        '<rect x="' + (fieldX + 230) + '" y="' + (employeeFieldY + 68) + '" width="176" height="34" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
+        '<rect x="' + (fieldX + 18 + HS_PERSON_SIDE_PADDING + HS_PERSON_BUTTON_WIDTH + HS_PERSON_BUTTON_GAP) + '" y="' + (employeeFieldY + HS_BUTTON_Y) + '" width="' + HS_PERSON_BUTTON_WIDTH + '" height="' + HS_PERSON_BUTTON_HEIGHT + '" rx="11" ry="11" fill="#ffffff" opacity="0.01" style="cursor:pointer;pointer-events:all;"></rect>' +
         '</a>'
 
       OrgChart.templates[templateName]["field_" + (employeeBase + 4)] =
-        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (fieldX + 18) + '" y="' + employeeFieldY + '" width="' + (cardWidth - 36) + '" height="62" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
+        '<rect class="hs-team-member-click" data-member-id="{val}" x="' + (fieldX + 18) + '" y="' + employeeFieldY + '" width="' + HS_PERSON_CARD_WIDTH + '" height="' + (HS_BUTTON_Y - 4) + '" fill="#ffffff" opacity="0.01" style="pointer-events:all;cursor:pointer;"></rect>'
     }
   }
 
