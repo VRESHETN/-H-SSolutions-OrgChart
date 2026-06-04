@@ -723,7 +723,7 @@ sap.ui.define([
       }.bind(this))
 
       this._prepareAreaCardTemplates(filteredNodes)
-      this._recreateChart(filteredNodes, 0.35)
+      this._recreateChart(filteredNodes, 0.5)
     },
 
     onApplyFilters: function () {
@@ -1254,7 +1254,6 @@ sap.ui.define([
             pid: rootId,
             node_type: "O",
             name: "Geschäftsführung",
-            title: "Unternehmensleitung",
             photo_url: "",
             tags: ["team_" + String(managementMembers.length)],
             member_count: managementMembers.length
@@ -2306,7 +2305,7 @@ sap.ui.define([
       var visibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
 
       if (visibleNodeId && this._chart) {
-        this._recreateChart(this._allNodes, 0.35)
+        this._recreateChart(this._allNodes, 0.5)
 
         setTimeout(function () {
           var refreshedVisibleNodeId = this._findVisibleNodeForEmployee(employeeNode)
