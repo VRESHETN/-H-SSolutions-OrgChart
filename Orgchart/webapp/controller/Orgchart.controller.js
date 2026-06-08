@@ -423,43 +423,6 @@ sap.ui.define([
       this._nodeFilterDialog.open()
     },
 
-    // onSelectAllNodeTreeItems: function () {
-    //   var tree = this.byId("nodeFilterTree")
-
-    //   if (!tree) {
-    //     return
-    //   }
-
-    //   tree.getItems().forEach(function (item) {
-    //     tree.setSelectedItem(item, true)
-    //   })
-
-    //   this._updateDeselectAllNodeButtonState()
-    // },
-
-    // onDeselectAllNodeTreeItems: function () {
-    //   var tree = this.byId("nodeFilterTree")
-
-    //   if (!tree) {
-    //     return
-    //   }
-
-    //   tree.removeSelections(true)
-    //   this._updateDeselectAllNodeButtonState()
-    // },
-
-    // _updateDeselectAllNodeButtonState: function () {
-    //   var tree = this.byId("nodeFilterTree")
-    //   var button = this.byId("deselectAllNodeButton")
-
-    //   if (!tree || !button) {
-    //     return
-    //   }
-
-    //   button.setEnabled(tree.getSelectedItems().length > 0)
-    // },
-
-
     onNodeTreeSelectionChange: function (event) {
       var tree = this.byId("nodeFilterTree")
       var changedItem = event.getParameter("listItem")
@@ -569,61 +532,6 @@ sap.ui.define([
     _cloneNodeFilterTree: function (nodes) {
       return JSON.parse(JSON.stringify(nodes || []))
     },
-
-    // _sortNodeFilterTreeBySearch: function (nodes, query) {
-    //   var normalizedQuery = String(query || "").toLowerCase()
-
-    //   function nodeMatches(node) {
-    //     return String(node.text || "").toLowerCase().indexOf(normalizedQuery) !== -1
-    //   }
-
-    //   function prepareNode(node) {
-    //     var children = node.children || []
-    //     var preparedChildren = children.map(prepareNode)
-
-    //     preparedChildren.sort(function (firstNode, secondNode) {
-    //       if (firstNode._searchRank !== secondNode._searchRank) {
-    //         return firstNode._searchRank - secondNode._searchRank
-    //       }
-
-    //       return String(firstNode.text || "").localeCompare(String(secondNode.text || ""))
-    //     })
-
-    //     node.children = preparedChildren
-
-    //     if (nodeMatches(node)) {
-    //       node._searchRank = 0
-    //     } else if (preparedChildren.some(function (child) {
-    //       return child._searchRank < 2
-    //     })) {
-    //       node._searchRank = 1
-    //     } else {
-    //       node._searchRank = 2
-    //     }
-
-    //     return node
-    //   }
-
-    //   nodes = nodes.map(prepareNode)
-
-    //   nodes.sort(function (firstNode, secondNode) {
-    //     if (firstNode._searchRank !== secondNode._searchRank) {
-    //       return firstNode._searchRank - secondNode._searchRank
-    //     }
-
-    //     return String(firstNode.text || "").localeCompare(String(secondNode.text || ""))
-    //   })
-
-    //   function cleanNode(node) {
-    //     delete node._searchRank
-
-    //       ; (node.children || []).forEach(cleanNode)
-    //   }
-
-    //   nodes.forEach(cleanNode)
-
-    //   return nodes
-    // },
 
     _syncNodeTreeSelection: function () {
       var tree = this.byId("nodeFilterTree")
@@ -2146,18 +2054,6 @@ sap.ui.define([
       wrapper.appendChild(content)
       fieldsContainer.appendChild(wrapper)
     },
-
-    // _centerAndZoomNode: function (nodeId) {
-    //   if (!this._chart || !nodeId) {
-    //     return
-    //   }
-
-    //   setTimeout(function () {
-    //     if (this._chart.center) {
-    //       this._chart.center(nodeId)
-    //     }
-    //   }.bind(this), 250)
-    // },
 
     onEmployeeSearchLiveChange: function (event) {
       var value = event.getParameter("value") || ""

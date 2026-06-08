@@ -69,8 +69,8 @@ OrgChart.templates.ula_custom_emp.field_4 =
 OrgChart.templates.ula_custom_emp.field_5 = ''
 
 OrgChart.templates.ula_custom_emp.link =
-  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 
 
 OrgChart.templates.ula_custom_emp_noskills = Object.assign({}, OrgChart.templates.ula_custom_emp)
@@ -111,8 +111,8 @@ OrgChart.templates.ula_custom_unit.field_4 = ''
 OrgChart.templates.ula_custom_unit.field_5 = ''
 
 OrgChart.templates.ula_custom_unit.link =
-  '<path stroke="#bfd0e2" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-  '<path stroke="#7fa7d6" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+  '<path stroke="#bfd0e2" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+  '<path stroke="#7fa7d6" stroke-width="2.8" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 
 
 OrgChart.templates.ula_custom_pos = Object.assign({}, OrgChart.templates.ula_custom_emp)
@@ -140,8 +140,8 @@ OrgChart.templates.ula_custom_pos.field_4 = ''
 OrgChart.templates.ula_custom_pos.field_5 = ''
 
 OrgChart.templates.ula_custom_pos.link =
-  '<path stroke="#d7e3f2" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-  '<path stroke="#9ebae6" stroke-width="2.7" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+  '<path stroke="#d7e3f2" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+  '<path stroke="#9ebae6" stroke-width="2.7" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 
 
 window.HsOrgChartTemplates = window.HsOrgChartTemplates || {}
@@ -295,8 +295,8 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
   }
 
   OrgChart.templates[templateName].link =
-    '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-    '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+    '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+    '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 }
 
 
@@ -323,8 +323,8 @@ OrgChart.templates.ula_custom_empty_team.field_5 = ''
 OrgChart.templates.ula_custom_empty_team.img_0 = ''
 
 OrgChart.templates.ula_custom_empty_team.link =
-  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 
 
 OrgChart.templates.ula_custom_anchor = Object.assign({}, OrgChart.templates.ula)
@@ -344,8 +344,8 @@ OrgChart.templates.ula_custom_anchor.field_5 = ''
 OrgChart.templates.ula_custom_anchor.img_0 = ''
 
 OrgChart.templates.ula_custom_anchor.link =
-  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+  '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+  '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 
 
 window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJson, areaWidth, areaHeight) {
@@ -445,8 +445,8 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
     }
 
     OrgChart.templates[templateName].link =
-      '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-      '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+      '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+      '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 
     return
   }
@@ -529,10 +529,12 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
   var node = '<g>'
 
   if (!hideOuterFrame) {
-    node +=
-      '<rect x="0" y="16" width="' + areaWidth + '" height="' + (areaHeight - 16) + '" rx="22" ry="22" fill="#ffffff" stroke="#0a6ed1" stroke-width="7" filter="url(#' + templateName + '_shadow)"></rect>'
-  }
+    var outerFrameY = 28
 
+    node +=
+      '<rect x="0" y="' + outerFrameY + '" width="' + areaWidth + '" height="' + (areaHeight - outerFrameY) + '" rx="22" ry="22" fill="#ffffff" stroke="#0a6ed1" stroke-width="7" filter="url(#' + templateName + '_shadow)"></rect>'
+  }
+  
   if (!hideAreaTitle) {
     node +=
       '<rect x="' + (centerX - 210) + '" y="0" width="420" height="56" rx="12" ry="12" fill="#0a6ed1"></rect>'
@@ -782,8 +784,8 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
   }
 
   OrgChart.templates[templateName].link =
-    '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-    '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+    '<path stroke="#dbe5f0" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+    '<path stroke="#9fb6cc" stroke-width="2.6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
 }
 
 
@@ -804,5 +806,5 @@ OrgChart.templates.ula_custom_root_unit.field_4 = ''
 OrgChart.templates.ula_custom_root_unit.field_5 = ''
 
 OrgChart.templates.ula_custom_root_unit.link =
-  '<path stroke="#bfd0e2" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>' +
-  '<path stroke="#7fa7d6" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round" d="{rounded}"></path>'
+  '<path stroke="#bfd0e2" stroke-width="6" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>' +
+  '<path stroke="#7fa7d6" stroke-width="2.8" fill="none" stroke-linecap="butt" stroke-linejoin="miter" d="{rounded}"></path>'
