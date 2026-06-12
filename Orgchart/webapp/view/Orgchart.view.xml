@@ -16,24 +16,16 @@
 
         <f:header>
             <f:DynamicPageHeader id="_IDGenDynamicPageHeader" pinnable="true">
-                <FlexBox id="headerContentBox" width="100%" direction="Row" wrap="Wrap" alignItems="End" justifyContent="SpaceBetween" class="hsOrgChartHeader">
+                <FlexBox id="headerContentBox" width="100%" direction="Row" wrap="Wrap" alignItems="End" class="hsOrgChartHeader">
 
                     <FlexBox id="filterFieldsBox" direction="Row" wrap="Wrap" alignItems="End" class="hsOrgChartFilterFields">
 
                         <VBox id="_IDGenVBox" class="hsOrgChartFilterItem">
-                            <layoutData>
-                                <FlexItemData growFactor="1" shrinkFactor="1" baseSize="420px" />
-                            </layoutData>
-
                             <Label id="_IDGenLabel" text="Organisationseinheit"/>
                             <Input id="nodeFilterDisplay" width="100%" editable="true" enabled="true" showValueHelp="true" valueHelpOnly="true" valueHelpRequest=".onOpenNodeFilterDialog" placeholder="Knoten auswählen" value="{treeFilterModel>/selectionText}" />
                         </VBox>
 
                         <VBox id="_IDGenVBox1" class="hsOrgChartFilterItem">
-                            <layoutData>
-                                <FlexItemData growFactor="1" shrinkFactor="1" baseSize="420px" />
-                            </layoutData>
-
                             <Label id="_IDGenLabel1" text="Suche"/>
                             <Input id="employeeSearch" width="100%" placeholder="Mitarbeiter, Rolle oder Kompetenz suchen" value="{searchModel>/query}" showClearIcon="true" showSuggestion="true" liveChange=".onEmployeeSearchLiveChange" suggest=".onEmployeeSearch" suggestionItemSelected=".onEmployeeSuggestionSelected" suggestionItems="{searchModel>/results}">
                                 <suggestionItems>
@@ -44,7 +36,7 @@
 
                     </FlexBox>
 
-                    <FlexBox id="filterButtonsBox" direction="Row" wrap="Wrap" alignItems="End" justifyContent="End" class="hsOrgChartFilterButtons">
+                    <FlexBox id="filterButtonsBox" direction="Row" wrap="NoWrap" alignItems="End" justifyContent="End" class="hsOrgChartFilterButtons">
 
                         <Button id="_IDGenButton" text="Start" type="Emphasized" press="onApplyFilters" />
 
