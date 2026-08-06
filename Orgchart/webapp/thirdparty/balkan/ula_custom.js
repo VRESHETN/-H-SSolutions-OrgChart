@@ -100,10 +100,9 @@ OrgChart.templates.ula_custom_unit.node =
 OrgChart.templates.ula_custom_unit.img_0 = ''
 
 OrgChart.templates.ula_custom_unit.field_0 =
-  '<text data-width="302" data-text-overflow="multiline" style="font-size:20px;font-weight:800;" fill="#ffffff" x="24" y="72">{val}</text>'
+  '<text data-width="300" data-text-overflow="multiline" style="font-size:22px;font-weight:900;" fill="#ffffff" x="175" y="76" text-anchor="middle">{val}</text>'
 
-OrgChart.templates.ula_custom_unit.field_1 =
-  '<text data-width="302" data-text-overflow="ellipsis" style="font-size:13px;font-weight:500;" fill="#dbe8f5" x="24" y="100">{val}</text>'
+OrgChart.templates.ula_custom_unit.field_1 = ''
 
 OrgChart.templates.ula_custom_unit.field_2 = ''
 OrgChart.templates.ula_custom_unit.field_3 = ''
@@ -223,11 +222,10 @@ window.HsOrgChartTemplates.createTeamTemplate = function (memberCount) {
 
   OrgChart.templates[templateName].node = node
 
-  OrgChart.templates[templateName].field_0 =
-    '<text data-width="' + headerTextWidth + '" data-text-overflow="ellipsis" style="font-size:18px;font-weight:800;" fill="#ffffff" x="' + centerX + '" y="' + (contentY + 32) + '" text-anchor="middle">{val}</text>'
+ OrgChart.templates[templateName].field_0 =
+  '<text data-width="' + headerTextWidth + '" data-text-overflow="ellipsis" style="font-size:22px;font-weight:900;" fill="#ffffff" x="' + centerX + '" y="' + (contentY + 39) + '" text-anchor="middle" dominant-baseline="middle">{val}</text>'
 
-  OrgChart.templates[templateName].field_1 =
-    '<text data-width="' + headerTextWidth + '" data-text-overflow="ellipsis" style="font-size:12px;font-weight:600;" fill="#eaf4ff" x="' + centerX + '" y="' + (contentY + 56) + '" text-anchor="middle">{val}</text>'
+OrgChart.templates[templateName].field_1 = ''
 
   OrgChart.templates[templateName].img_0 = ''
 
@@ -710,8 +708,8 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
       continue
     }
 
-    var fieldBase = 200 + (slot - 1) * 50
-    var fieldImageBase = 100 + (slot - 1) * 10
+    var fieldBase = 200 + (slot - 1) * 100
+    var fieldImageBase = 100 + (slot - 1) * 30
     var fieldX = positions[slot].x
     var fieldY = positions[slot].y
     var fieldEmployeeCount = (cardMetaMap[slot] || {}).employeeCount || 0
@@ -723,8 +721,7 @@ window.HsOrgChartTemplates.createAreaCardTemplate = function (areaIndex, layoutJ
       '</clipPath>'
 
     OrgChart.templates[templateName]["field_" + fieldBase] =
-      '<text data-width="' + (cardWidth - 40) + '" data-text-overflow="ellipsis" style="font-size:16px;font-weight:900;" fill="#ffffff" x="' + (fieldX + cardWidth / 2) + '" y="' + (fieldY + 34) + '" text-anchor="middle">{val}</text>'
-
+      '<text data-width="' + (cardWidth - 60) + '" data-text-overflow="ellipsis" style="font-size:22px;font-weight:900;" fill="#ffffff" x="' + (fieldX + cardWidth / 2) + '" y="' + (fieldY + 49) + '" text-anchor="middle">{val}</text>'
     if (!fieldHideLeader) {
       OrgChart.templates[templateName]["img_" + fieldImageBase] =
         '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#' + templateName + '_card_' + slot + '_leader_circle)" xlink:href="{val}" x="' + (fieldX + 18 + HS_AVATAR_X - HS_AVATAR_RADIUS) + '" y="' + (fieldY + 98 + HS_AVATAR_Y - HS_AVATAR_RADIUS) + '" width="' + HS_AVATAR_SIZE + '" height="' + HS_AVATAR_SIZE + '"></image>'

@@ -11,7 +11,7 @@ sap.ui.define([
   "sap/m/SearchField"
 ], function (Controller, JSONModel, Dialog, Tree, StandardTreeItem, Button, VBox, Bar, Title, SearchField) {
   "use strict"
-
+  var HS_MAX_AREA_CARD_EMPLOYEES = 15 
   return Controller.extend("hs.com.orgchart.controller.Orgchart", {
 
     onInit: function () {
@@ -42,6 +42,7 @@ sap.ui.define([
 
     },
 
+    
     onLoad: function () {
       var model = this.getOwnerComponent().getModel()
 
@@ -1384,7 +1385,7 @@ sap.ui.define([
       function getEmployeeCount(card) {
         var count = 0
 
-        for (var index = 1; index <= 8; index++) {
+        for (var index = 1; index <= HS_MAX_AREA_CARD_EMPLOYEES; index++) {
           if (card["emp_" + index + "_id"] || card["emp_" + index + "_name"]) {
             count++
           }
@@ -1404,7 +1405,7 @@ sap.ui.define([
         target[prefix + "leader_teams_url"] = card.leader_teams_url || ""
         target[prefix + "leader_outlook_url"] = card.leader_outlook_url || ""
 
-        for (var employeeIndex = 1; employeeIndex <= 8; employeeIndex++) {
+        for (var employeeIndex = 1; employeeIndex <= HS_MAX_AREA_CARD_EMPLOYEES; employeeIndex++) {
           target[prefix + "emp_" + employeeIndex + "_id"] = card["emp_" + employeeIndex + "_id"] || ""
           target[prefix + "emp_" + employeeIndex + "_name"] = card["emp_" + employeeIndex + "_name"] || ""
           target[prefix + "emp_" + employeeIndex + "_title"] = card["emp_" + employeeIndex + "_title"] || ""
@@ -1703,8 +1704,8 @@ sap.ui.define([
       }
 
       for (var areaCardIndex = 1; areaCardIndex <= 12; areaCardIndex++) {
-        var areaBase = 200 + (areaCardIndex - 1) * 50
-        var areaImageBase = 100 + (areaCardIndex - 1) * 10
+        var areaBase = 200 + (areaCardIndex - 1) * 100
+        var areaImageBase = 100 + (areaCardIndex - 1) * 30
 
         binding["field_" + areaBase] = "area_card_" + areaCardIndex + "_name"
         binding["field_" + (areaBase + 1)] = "area_card_" + areaCardIndex + "_leader_name"
@@ -1715,7 +1716,7 @@ sap.ui.define([
 
         binding["img_" + areaImageBase] = "area_card_" + areaCardIndex + "_leader_photo"
 
-        for (var areaMemberIndex = 1; areaMemberIndex <= 8; areaMemberIndex++) {
+        for (var areaMemberIndex = 1; areaMemberIndex <= HS_MAX_AREA_CARD_EMPLOYEES; areaMemberIndex++) {
           var memberBase = areaBase + 10 + (areaMemberIndex - 1) * 5
 
           binding["field_" + memberBase] = "area_card_" + areaCardIndex + "_emp_" + areaMemberIndex + "_name"
@@ -2263,7 +2264,7 @@ sap.ui.define([
             return true
           }
 
-          for (var employeeIndex = 1; employeeIndex <= 8; employeeIndex++) {
+          for (var employeeIndex = 1; employeeIndex <= HS_MAX_AREA_CARD_EMPLOYEES; employeeIndex++) {
             if (node["area_card_" + areaCardIndex + "_emp_" + employeeIndex + "_id"] === employeeNode.id) {
               resultId = node.id
               return true

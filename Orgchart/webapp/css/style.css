@@ -274,12 +274,36 @@
   word-break: break-word;
 }
 
+.hsOrgChartPage .sapFDynamicPageContent,
+.hsOrgChartPage .sapFDynamicPageContentWrapper,
+.hsOrgChartPage .sapFDynamicPageContentFitContainer {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.hsOrgChartBody {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden;
+}
+
+.hsOrgChartBody>div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#chartHost {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .hsOrgChartHeader {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-end;
   align-content: flex-start;
+  justify-content: flex-start;
   gap: 12px;
   width: 100%;
 }
@@ -290,6 +314,7 @@
   flex-wrap: wrap;
   align-items: flex-end;
   align-content: flex-start;
+  justify-content: flex-start;
   gap: 12px;
   flex: 1 1 auto;
   min-width: 0;
@@ -318,7 +343,6 @@
 
 @media (max-width: 900px) {
   .hsOrgChartHeader {
-    display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: flex-start;
@@ -329,7 +353,6 @@
   }
 
   .hsOrgChartFilterFields {
-    display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: flex-start;
@@ -369,4 +392,40 @@
   .hsOrgChartFilterButtons .sapUiTinyMarginBegin {
     margin-left: 0 !important;
   }
+}
+
+
+
+.hsNodeFilterDialog .sapMDialogScroll,
+.hsNodeFilterDialog .sapMDialogScrollCont,
+.hsNodeFilterDialog .sapMScrollCont,
+.hsNodeFilterDialog .sapMScrollContScroll,
+.hsNodeFilterDialog .sapMTree,
+.hsNodeFilterDialog .sapMList,
+.hsNodeFilterDialog .sapMListItems {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+.hsNodeFilterDialog .sapMLIB,
+.hsNodeFilterDialog .sapMLIBContent,
+.hsNodeFilterDialog .sapMTreeItemBase,
+.hsNodeFilterDialog .sapMTreeItemBaseContent,
+.hsNodeFilterDialog .sapMTreeItemBaseChildren {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
+.hsNodeFilterDialog .sapMText,
+.hsNodeFilterDialog .sapMLabel,
+.hsNodeFilterDialog .sapMSLITitle,
+.hsNodeFilterDialog .sapMLIBContent {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.hsNodeFilterDialog .sapMDialogSection {
+  overflow-x: hidden !important;
 }
